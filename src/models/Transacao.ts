@@ -1,8 +1,8 @@
-import { TipoOcorrencia } from './Enums';
+import { TipoTransacao } from './Enums';
 
 export interface Transacao {
   id: string;
-  tipo: TipoOcorrencia;
+  tipo: TipoTransacao;
   quantidade: number;
   data: Date;
 }
