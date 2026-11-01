@@ -7,4 +7,6 @@ export interface Ocorrencia extends Localizacao {
   descricao: string;
   status: StatusOcorrencia;
   dataCriacao: Date;
+  latitude: number;
+  longitude: number;
 }
