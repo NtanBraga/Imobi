@@ -21,7 +21,7 @@ Utilize o comando git checkout -b para criar e alternar para a nova branch e nom
 
 ### 3.1) Crie um Commit
 Crie um commit e adicione a mensagem indicando a issue resolvida:
-> Exemplo: `git commit -m "feat: create controllers-user"`
+> Exemplo: `git commit -m "create controllers-user"`
 
 
 ### 3.2) Tipos de nomenclaturas
