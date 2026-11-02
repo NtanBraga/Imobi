@@ -1,7 +1,7 @@
 import { useUI, useWallet } from '@/hooks';
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 export function CarteiraBottomSheet() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -46,7 +46,23 @@ export function CarteiraBottomSheet() {
       backgroundStyle={{ borderRadius: 24 }}
     >
       <BottomSheetView>
-        <TouchableOpacity></TouchableOpacity>
+        <Text>SUA CARTEIRA</Text>
+        <Text> {saldo.toLocaleString('pt-BR')} moedas</Text>
+        <Text>Acumule moedas para adquirir novos avatares e customizar seu perfil</Text>
+
+        {/*RESGATE*/}
+        <TouchableOpacity>
+          <View>
+            <Text>Recompensa Diaria</Text>
+            <Text>{resgatouhoje ? 'Volte amanhã para mais.' : 'Resgate agora suas moedas!'}</Text>
+          </View>
+
+          {!resgatouhoje && (
+            <View>
+              <Text>Resgatar</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </BottomSheetView>
     </BottomSheetModal>
   );
