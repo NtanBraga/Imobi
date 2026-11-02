@@ -1,5 +1,5 @@
 import { useMap } from '@/hooks';
-import { ModoVisualizacao } from '@/models';
+import { ModoLocomocao, ModoVisualizacao } from '@/models';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -15,7 +15,7 @@ export default function Map() {
   };
 
   return (
-    <View style={styles.constainer}>
+    <View style={styles.container}>
       <MapView
         style={StyleSheet.absoluteFill}
         provider={PROVIDER_GOOGLE}
@@ -31,17 +31,43 @@ export default function Map() {
         <View style={styles.toggleGroup}>
           {/*Alterar transito e a pe*/}
           <View style={styles.row}>
-            <TouchableOpacity>
-              <Text>Carro</Text>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                modoLocomocao === ModoLocomocao.TRANSITO && styles.activateModeButton,
+              ]}
+              onPress={() => setModoLocomocao(ModoLocomocao.TRANSITO)}
+            >
+              <Text
+                style={[
+                  styles.modeText,
+                  modoLocomocao === ModoLocomocao.TRANSITO && styles.activateModeText,
+                ]}
+              >
+                Carro
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
-              <Text>A pé</Text>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                modoLocomocao === ModoLocomocao.A_PE && styles.activateModeButton,
+              ]}
+              onPress={() => setModoLocomocao(ModoLocomocao.A_PE)}
+            >
+              <Text
+                style={[
+                  styles.modeText,
+                  modoLocomocao === ModoLocomocao.A_PE && styles.activateModeText,
+                ]}
+              >
+                A pé
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/*Alterar Modo Off e Modo On*/}
-          <TouchableOpacity>
+          <TouchableOpacity style={styles.gamificationToggle} onPress={setModoVisualizacao}>
             <Text>{modoVisualizacao === ModoVisualizacao.ON ? 'Modo On' : 'Modo Off'}</Text>
           </TouchableOpacity>
         </View>
@@ -49,9 +75,8 @@ export default function Map() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  constainer: {
+  container: {
     flex: 1,
   },
   topControls: {
@@ -71,5 +96,28 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: 15,
+  },
+
+  modeButton: {
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+  },
+
+  activateModeButton: {
+    backgroundColor: '#36578f',
+  },
+
+  modeText: {
+    fontWeight: 600,
+  },
+
+  activateModeText: {
+    color: 'white',
+  },
+
+  gamificationToggle: {
+    padding: 10,
+    justifyContent: 'center',
   },
 });
