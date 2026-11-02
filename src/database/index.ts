@@ -15,7 +15,7 @@ export const initializeDatabase = async (): Promise<void> => {
 
     //Mock Injetar usuario e carteira MVP
 
-    database.runAsync(`INSERT OR IGNORE INTO Usuario (id, nome) VALUES ('user-mvp, 'Bob')`);
+    database.runAsync(`INSERT OR IGNORE INTO Usuario (id, nome) VALUES ('user-mvp', 'Bob')`);
 
     database.runAsync(
       `INSERT OR IGNORE INTO Carteira (id, usuarioId, saldo) VALUES ('wallet-mvp', 'user-mvp', 0)`,
