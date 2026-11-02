@@ -100,13 +100,25 @@ export default function Map() {
 
       {/*Botao flutuante de reportes*/}
       {tabAtiva === 'NENHUM' && (
-        <TouchableOpacity
-          style={styles.tabReport}
-          onPress={() => abrirTab('OCORRENCIA')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.tabReportText}>+</Text>
-        </TouchableOpacity>
+        <View style={styles.bottomControls}>
+          {/*OCORRENCIA*/}
+          <TouchableOpacity
+            style={[styles.tabReport, { backgroundColor: 'cyan' }]}
+            onPress={() => abrirTab('LOJA')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.tabReportText}>+</Text>
+          </TouchableOpacity>
+
+          {/*LOJA*/}
+          <TouchableOpacity
+            style={[styles.tabReport, { backgroundColor: 'orange' }]}
+            onPress={() => abrirTab('OCORRENCIA')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.tabReportText}>+</Text>
+          </TouchableOpacity>
+        </View>
       )}
     </View>
   );
@@ -161,21 +173,25 @@ const styles = StyleSheet.create({
     color: '#0f1f7a',
   },
   tabReport: {
-    position: 'absolute',
-    bottom: 40,
-    alignSelf: 'center',
     width: 64,
     height: 64,
     borderRadius: 30,
-    backgroundColor: 'orange',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
-    zIndex: 10,
   },
   tabReportText: {
     fontSize: 30,
     color: 'white',
     fontWeight: 'bold',
+  },
+  bottomControls: {
+    position: 'absolute',
+    bottom: 40,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    zIndex: 10,
   },
 });
