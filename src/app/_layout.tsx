@@ -1,9 +1,10 @@
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import { initializeDatabase } from '@/database';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function StackLayout() {
   useEffect(() => {

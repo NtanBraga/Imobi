@@ -1,4 +1,4 @@
-import { useLocation, useMap } from '@/hooks';
+import { useLocation, useMap, useUI } from '@/hooks';
 import { ModoLocomocao, ModoVisualizacao } from '@/models';
 import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -8,6 +8,7 @@ export default function Map() {
   const { modoLocomocao, setModoLocomocao, modoVisualizacao, setModoVisualizacao } = useMap();
   const { location } = useLocation();
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
+  const { abrirTab } = useUI();
 
   useEffect(() => {
     if (location && mapRef.current) {
@@ -96,6 +97,15 @@ export default function Map() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/*Botao flutuante de reportes*/}
+      <TouchableOpacity
+        style={styles.tabReport}
+        onPress={() => abrirTab('OCORRENCIA')}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.tabReportText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -147,5 +157,23 @@ const styles = StyleSheet.create({
   gamificationToggleText: {
     fontWeight: 'bold',
     color: '#0f1f7a',
+  },
+  tabReport: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    width: 64,
+    height: 64,
+    borderRadius: 30,
+    backgroundColor: 'orange',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    zIndex: 10,
+  },
+  tabReportText: {
+    fontSize: 30,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
