@@ -1,6 +1,6 @@
 import { useMap } from '@/hooks';
 import { ModoVisualizacao } from '@/models';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function Map() {
@@ -15,8 +15,9 @@ export default function Map() {
   };
 
   return (
-    <View>
+    <View style={styles.constainer}>
       <MapView
+        style={StyleSheet.absoluteFill}
         provider={PROVIDER_GOOGLE}
         initialRegion={initialRegion}
         showsUserLocation={false} //Aguardando GPS usuario
@@ -26,10 +27,10 @@ export default function Map() {
       />
 
       {/*Controles*/}
-      <View>
-        <View>
+      <View style={styles.topControls}>
+        <View style={styles.toggleGroup}>
           {/*Alterar transito e a pe*/}
-          <View>
+          <View style={styles.row}>
             <TouchableOpacity>
               <Text>Carro</Text>
             </TouchableOpacity>
@@ -48,3 +49,27 @@ export default function Map() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  constainer: {
+    flex: 1,
+  },
+  topControls: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    right: 20,
+    zIndex: 10,
+  },
+  toggleGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    padding: 15,
+    borderRadius: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+});
