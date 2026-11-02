@@ -1,12 +1,33 @@
-import { useMap } from '@/hooks';
+import { useLocation, useMap } from '@/hooks';
 import { ModoLocomocao, ModoVisualizacao } from '@/models';
+import { useEffect, useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function Map() {
   const { modoLocomocao, setModoLocomocao, modoVisualizacao, setModoVisualizacao } = useMap();
+  const { location } = useLocation();
+  const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
 
-  //Mock enquanto GPS usuario nao esta feito
+  useEffect(() => {
+    if (location && mapRef.current) {
+      // Delta maior = Zoom menor; Delta menor = Zoom maior
+      //Zoom menor para Carro, Zoom maior para A pé
+      const deltaZoom = modoLocomocao == ModoLocomocao.TRANSITO ? 0.0015 : 0.003;
+
+      mapRef.current.animateToRegion(
+        {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: deltaZoom,
+          longitudeDelta: deltaZoom,
+        },
+        1000,
+      ); // 1000ms para animar
+    }
+  }, [location, modoLocomocao]);
+
+  //Mock inicial ate o mapa carregar o gps
   const initialRegion = {
     latitude: -30.269359,
     longitude: -51.299773,
@@ -18,9 +39,10 @@ export default function Map() {
     <View style={styles.container}>
       <MapView
         style={StyleSheet.absoluteFill}
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         initialRegion={initialRegion}
-        showsUserLocation={false} //Aguardando GPS usuario
+        showsUserLocation={true} //Aguardando GPS usuario
         showsCompass={false}
         showsMyLocationButton={false}
         //TODO: zoom e angulo da camera
@@ -68,7 +90,9 @@ export default function Map() {
 
           {/*Alterar Modo Off e Modo On*/}
           <TouchableOpacity style={styles.gamificationToggle} onPress={setModoVisualizacao}>
-            <Text>{modoVisualizacao === ModoVisualizacao.ON ? 'Modo On' : 'Modo Off'}</Text>
+            <Text style={styles.gamificationToggleText}>
+              {modoVisualizacao === ModoVisualizacao.ON ? 'Modo On' : 'Modo Off'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -119,5 +143,9 @@ const styles = StyleSheet.create({
   gamificationToggle: {
     padding: 10,
     justifyContent: 'center',
+  },
+  gamificationToggleText: {
+    fontWeight: 'bold',
+    color: '#0f1f7a',
   },
 });
