@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/ui": "~58.0.26",
+    "@gorhom/bottom-sheet": "^5.2.14",
     "expo": "~58.0.22",
     "expo-audio": "~58.0.11",
     "expo-constants": "~58.0.14",
