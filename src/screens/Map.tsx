@@ -98,25 +98,33 @@ export default function Map() {
         </View>
       </View>
 
-      {/*Botao flutuante de reportes*/}
+      {/*Botoes flutuantes*/}
       {tabAtiva === 'NENHUM' && (
         <View style={styles.bottomControls}>
           {/*OCORRENCIA*/}
           <TouchableOpacity
-            style={[styles.tabReport, { backgroundColor: 'cyan' }]}
+            style={[styles.tabButtons, { backgroundColor: 'cyan' }]}
             onPress={() => abrirTab('LOJA')}
             activeOpacity={0.8}
           >
-            <Text style={styles.tabReportText}>+</Text>
+            <Text style={styles.tabButtonText}>L</Text>
           </TouchableOpacity>
 
           {/*LOJA*/}
           <TouchableOpacity
-            style={[styles.tabReport, { backgroundColor: 'orange' }]}
+            style={[styles.tabButtons, { backgroundColor: 'orange' }]}
             onPress={() => abrirTab('OCORRENCIA')}
             activeOpacity={0.8}
           >
-            <Text style={styles.tabReportText}>+</Text>
+            <Text style={styles.tabButtonText}>O</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.tabButtons, { backgroundColor: 'green' }]}
+            onPress={() => abrirTab('CARTEIRA')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.tabButtonText}>C</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -172,7 +180,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0f1f7a',
   },
-  tabReport: {
+  tabButtons: {
     width: 64,
     height: 64,
     borderRadius: 30,
@@ -180,7 +188,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 8,
   },
-  tabReportText: {
+  tabButtonText: {
     fontSize: 30,
     color: 'white',
     fontWeight: 'bold',
