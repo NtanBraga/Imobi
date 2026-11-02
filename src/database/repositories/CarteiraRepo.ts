@@ -1,4 +1,4 @@
-import { Transacao } from '@/models/Transacao';
+import { TipoTransacao } from '@/models';
 import * as SQLite from 'expo-sqlite';
 
 export const CarteiraRepository = {
@@ -13,26 +13,23 @@ export const CarteiraRepository = {
   registrarTransacao: async (
     db: SQLite.SQLiteDatabase,
     carteiraId: string,
-    transacao: Transacao,
+    transacaoTipo: TipoTransacao,
+    quantidade: number,
   ): Promise<boolean> => {
     try {
       await db.withTransactionAsync(async () => {
+        const transacaoId = Math.random().toString(36).substring(2, 9);
+
         await db.runAsync(
           'INSERT INTO Transacao (id, carteiraId, tipo, quantidade, data) VALUES (?, ?, ?, ?, ?)',
-          [
-            transacao.id,
-            carteiraId,
-            transacao.tipo,
-            transacao.quantidade,
-            transacao.data.toISOString(),
-          ],
+          [transacaoId, carteiraId, transacaoTipo, quantidade, new Date().toISOString()],
         );
 
         //atualiza o saldo baseado no tipo soma ou subtração da conta
-        const modificador = transacao.tipo === 'CREDITO' ? '+' : '-';
+        const modificador = transacaoTipo === 'CREDITO' ? '+' : '-';
 
         await db.runAsync(`UPDATE Carteira SET saldo = saldo ${modificador} ? WHERE id = ?`, [
-          transacao.quantidade,
+          quantidade,
           carteiraId,
         ]);
       });
