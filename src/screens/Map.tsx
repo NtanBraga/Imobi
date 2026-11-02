@@ -8,7 +8,7 @@ export default function Map() {
   const { modoLocomocao, setModoLocomocao, modoVisualizacao, setModoVisualizacao } = useMap();
   const { location } = useLocation();
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
-  const { abrirTab } = useUI();
+  const { abrirTab, tabAtiva } = useUI();
 
   useEffect(() => {
     if (location && mapRef.current) {
@@ -99,13 +99,15 @@ export default function Map() {
       </View>
 
       {/*Botao flutuante de reportes*/}
-      <TouchableOpacity
-        style={styles.tabReport}
-        onPress={() => abrirTab('OCORRENCIA')}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.tabReportText}>+</Text>
-      </TouchableOpacity>
+      {tabAtiva === 'NENHUM' && (
+        <TouchableOpacity
+          style={styles.tabReport}
+          onPress={() => abrirTab('OCORRENCIA')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.tabReportText}>+</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
