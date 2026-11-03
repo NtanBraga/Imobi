@@ -1,5 +1,7 @@
-import { useUI } from '@/hooks';
-import { TipoOcorrencia } from '@/models';
+import { db } from '@/database';
+import { OcorrenciaRepository } from '@/database/repositories';
+import { useLocation, useUI } from '@/hooks';
+import { StatusOcorrencia, TipoOcorrencia } from '@/models';
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -9,6 +11,7 @@ export function OcorrenciaBottomSheet() {
   const isMountedRef = useRef(false);
   const { tabAtiva, fecharTabs } = useUI();
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoOcorrencia | null>(null);
+  const { location } = useLocation();
 
   //controlar abertura/fechamento
   useEffect(() => {
@@ -21,10 +24,25 @@ export function OcorrenciaBottomSheet() {
     }
   }, [tabAtiva]);
 
-  const confirmarReport = () => {
-    if (!tipoSelecionado) return;
+  const confirmarReport = async () => {
+    if (!tipoSelecionado || !location) return;
 
-    //TODO: CHAMAR O SERVICO GPS E SALVAR NO SQLITE
+    const database = await db;
+    const novaOcorrencia = {
+      id: Math.random().toString(36).substring(2, 9),
+      tipo: tipoSelecionado,
+      descricao: '', // durante o MVP ele vai ficar como opcional
+      status: StatusOcorrencia.ATIVA,
+      dataCriacao: new Date(),
+      latitude: location.latitude,
+      longitude: location.longitude,
+    };
+
+    const sucesso = await OcorrenciaRepository.criar(database, novaOcorrencia);
+    if (sucesso) {
+      //ideia: Poder dar creditos (creditar(50)) para cada reporte
+      console.log('Ocorrencia salva ocm sucesso no SQLITE');
+    }
 
     fecharTabs();
   };
