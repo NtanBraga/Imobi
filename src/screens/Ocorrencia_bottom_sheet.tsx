@@ -1,10 +1,10 @@
 import { db } from '@/database';
 import { OcorrenciaRepository } from '@/database/repositories';
-import { useLocation, useUI } from '@/hooks';
+import { useLocation, useUI, useWallet } from '@/hooks';
 import { StatusOcorrencia, TipoOcorrencia } from '@/models';
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export function OcorrenciaBottomSheet() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -12,6 +12,7 @@ export function OcorrenciaBottomSheet() {
   const { tabAtiva, fecharTabs } = useUI();
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoOcorrencia | null>(null);
   const { location } = useLocation();
+  const { creditar } = useWallet();
 
   //controlar abertura/fechamento
   useEffect(() => {
@@ -25,7 +26,12 @@ export function OcorrenciaBottomSheet() {
   }, [tabAtiva]);
 
   const confirmarReport = async () => {
-    if (!tipoSelecionado || !location) return;
+    if (!tipoSelecionado) return;
+
+    if (!location) {
+      Alert.alert('Aviso', 'Aguardando sinal de GPS...');
+      return;
+    }
 
     const database = await db;
     const novaOcorrencia = {
@@ -40,8 +46,10 @@ export function OcorrenciaBottomSheet() {
 
     const sucesso = await OcorrenciaRepository.criar(database, novaOcorrencia);
     if (sucesso) {
-      //ideia: Poder dar creditos (creditar(50)) para cada reporte
-      console.log('Ocorrencia salva ocm sucesso no SQLITE');
+      creditar(50);
+      Alert.alert('Sucesso', 'Ocorrência registrada. Você ganhou +50 moedas.');
+    } else {
+      Alert.alert('Erro', 'Falha ao registrar ocorrência.');
     }
 
     fecharTabs();
