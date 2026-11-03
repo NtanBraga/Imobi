@@ -1,7 +1,9 @@
-export interface Loja {
+import { Localizacao } from './Localizacao';
+
+export interface Loja extends Localizacao {
   id: string;
-  valor: number;
-  coletada: boolean;
+  nome: string;
+  categoria: string;
   latitude: number;
   longitude: number;
 }
