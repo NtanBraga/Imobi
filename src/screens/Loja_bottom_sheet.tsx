@@ -1,9 +1,9 @@
 import { db } from '@/database';
 import { LojaRepository } from '@/database/repositories';
-import { useLocation, useUI } from '@/hooks';
+import { useLocation, useUI, useWallet } from '@/hooks';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export function LojaBottomSheet() {
   const bottomSheetref = useRef<BottomSheetModal>(null);
@@ -15,6 +15,7 @@ export function LojaBottomSheet() {
   const [categoria, setCategoria] = useState('');
 
   const { location } = useLocation();
+  const { creditar } = useWallet();
 
   useEffect(() => {
     if (tabAtiva === 'LOJA') {
@@ -28,7 +29,12 @@ export function LojaBottomSheet() {
   }, [tabAtiva]);
 
   const registrarLoja = async () => {
-    if (!nomeLoja || !categoria || !location) return;
+    if (!nomeLoja || !categoria) return;
+
+    if (!location) {
+      Alert.alert('Aviso', 'Aguardando sinal de GPS...');
+      return;
+    }
 
     const database = await db;
     const novaLoja = {
@@ -42,7 +48,10 @@ export function LojaBottomSheet() {
     const sucesso = await LojaRepository.criar(database, novaLoja);
 
     if (sucesso) {
-      console.log('Loja salva com sucesso ao SQLite');
+      creditar(100);
+      Alert.alert('Sucesso', 'Estabelecimento registrado. Você ganhou +100 moedas.');
+    } else {
+      Alert.alert('Erro', 'Falha ao registrar estabelecimento.');
     }
 
     fecharTabs();
