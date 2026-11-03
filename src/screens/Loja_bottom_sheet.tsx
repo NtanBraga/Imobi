@@ -1,4 +1,6 @@
-import { useUI } from '@/hooks';
+import { db } from '@/database';
+import { LojaRepository } from '@/database/repositories';
+import { useLocation, useUI } from '@/hooks';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -12,6 +14,8 @@ export function LojaBottomSheet() {
   const [nomeLoja, setNomeLoja] = useState('');
   const [categoria, setCategoria] = useState('');
 
+  const { location } = useLocation();
+
   useEffect(() => {
     if (tabAtiva === 'LOJA') {
       isMountedRef.current = true;
@@ -23,10 +27,23 @@ export function LojaBottomSheet() {
     }
   }, [tabAtiva]);
 
-  const registrarLoja = () => {
-    if (!nomeLoja || !categoria) return;
+  const registrarLoja = async () => {
+    if (!nomeLoja || !categoria || !location) return;
 
-    //TODO: no futuro capturar coordenadas GPS e gravar a loja no SQLITE
+    const database = await db;
+    const novaLoja = {
+      id: Math.random().toString(36).substring(2, 9),
+      nome: nomeLoja,
+      categoria: categoria,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    };
+
+    const sucesso = await LojaRepository.criar(database, novaLoja);
+
+    if (sucesso) {
+      console.log('Loja salva com sucesso ao SQLite');
+    }
 
     fecharTabs();
   };
