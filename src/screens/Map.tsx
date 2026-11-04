@@ -13,8 +13,8 @@ export default function Map() {
   //Mock de movimento GPS --DEV
   const [devOffset, setDevOffset] = useState({ lat: 0, lng: 0 });
   const moveInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isEnabledDevMode = true;
 
-  //Movimento --DEV
   const startMoving = (dLat: number, dLng: number) => {
     stopMoving();
     moveInterval.current = setInterval(() => {
@@ -71,13 +71,13 @@ export default function Map() {
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         initialRegion={initialRegion}
-        showsUserLocation={!__DEV__}
+        showsUserLocation={!isEnabledDevMode}
         showsCompass={false}
         showsMyLocationButton={false}
         //TODO: angulo da camera
       >
         {/*Marcador Dev*/}
-        {__DEV__ && currentLocation && (
+        {isEnabledDevMode && currentLocation && (
           <Marker coordinate={currentLocation} anchor={{ x: 0.5, y: 0.5 }}>
             <View style={styles.blueDotContainer}>
               {/*Aura de precisao*/}
@@ -171,7 +171,7 @@ export default function Map() {
       )}
 
       {/*D-PAD DEVELOPER*/}
-      {__DEV__ && tabAtiva === 'NENHUM' && (
+      {isEnabledDevMode && tabAtiva === 'NENHUM' && (
         <View style={styles.dpadContainer}>
           <TouchableOpacity
             style={styles.dpadBtn}
