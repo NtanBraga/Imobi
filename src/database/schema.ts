@@ -33,14 +33,15 @@ export const DATABASE_SCHEMA = `
 
     CREATE TABLE IF NOT EXISTS Ocorrencia (
         id TEXT PRIMARY KEY,
-        carteiraId TEXT NOT NULL,
         tipo TEXT NOT NULL,
-        quantidade INTEGER NOT NULL,
-        data TEXT NOT NULL,
-        FOREIGN KEY (carteiraId) REFERENCES Carteira(id) ON DELETE CASCADE
+        descricao TEXT,
+        status TEXT NOT NULL,
+        latitude DECIMAL(9,6) NOT NULL,
+        longitude DECIMAL(10,6) NOT NULL,
+        dataCriacao TEXT NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS ConfirmacaoOccorencia (
+    CREATE TABLE IF NOT EXISTS ConfirmacaoOcorrencia (
         id TEXT PRIMARY KEY,
         ocorrenciaId TEXT NOT NULL,
         usuarioId TEXT NOT NULL,
