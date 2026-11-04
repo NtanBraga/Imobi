@@ -1,5 +1,7 @@
+import { db } from '@/database';
+import { LojaRepository, OcorrenciaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI } from '@/hooks';
-import { ModoLocomocao, ModoVisualizacao } from '@/models';
+import { Loja, ModoLocomocao, ModoVisualizacao, Ocorrencia, TipoOcorrencia } from '@/models';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -64,6 +66,41 @@ export default function Map() {
     longitudeDelta: 0.05,
   };
 
+  //Buscar dados no SQLite quando nenhuma tab ativa (para marcadores)
+  const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
+  const [lojas, setLojas] = useState<Loja[]>([]);
+
+  useEffect(() => {
+    if (tabAtiva === 'NENHUM') {
+      const carregarMarcadores = async () => {
+        const database = await db;
+        const ocorrenciasDB = await OcorrenciaRepository.buscarTodas(database);
+        const lojasDB = await LojaRepository.buscarTodas(database);
+        setOcorrencias(ocorrenciasDB);
+        setLojas(lojasDB);
+      };
+      carregarMarcadores();
+    }
+  }, [tabAtiva]);
+
+  //Cores dos marcadores baseado por ocorrencia
+  const getCorOcorrencia = (tipo: TipoOcorrencia) => {
+    switch (tipo) {
+      case TipoOcorrencia.ARVORE_CAIDA:
+        return 'green';
+      case TipoOcorrencia.BURACO:
+        return 'blue';
+      case TipoOcorrencia.PEDESTRE_MACHUCADO:
+        return 'orange';
+      case TipoOcorrencia.RADAR:
+        return 'yellow';
+      case TipoOcorrencia.ZONA_PERIGO:
+        return 'red';
+      default:
+        return 'red';
+    }
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -88,6 +125,27 @@ export default function Map() {
             </View>
           </Marker>
         )}
+
+        {/*Renderizar ocorrencias*/}
+        {ocorrencias.map((oc) => (
+          <Marker
+            key={oc.id}
+            coordinate={{ latitude: oc.latitude, longitude: oc.longitude }}
+            title={oc.tipo}
+            pinColor={getCorOcorrencia(oc.tipo)}
+          />
+        ))}
+
+        {/*Renderizar lojas*/}
+        {lojas.map((lj) => (
+          <Marker
+            key={lj.id}
+            coordinate={{ latitude: lj.latitude, longitude: lj.longitude }}
+            title={lj.nome}
+            description={lj.categoria}
+            pinColor="cyan"
+          />
+        ))}
       </MapView>
 
       {/*Controles*/}
