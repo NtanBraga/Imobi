@@ -101,6 +101,29 @@ export default function Map() {
     }
   };
 
+  //Deletar todo banco de dados local
+  const limparBancodeDados = async () => {
+    const database = await db;
+
+    try {
+      await database.execAsync(
+        `
+          DELETE FROM Ocorrencia;
+          DELETE FROM Loja;
+          DELETE FROM Moeda;
+          DELETE FROM Transacao;
+          UPDATE Carteira SET saldo = 0;
+        `,
+      );
+
+      setOcorrencias([]);
+      setLojas([]);
+      alert('Base de dados limpa com sucesso.');
+    } catch (e) {
+      console.error('Erro ao limpar banco:', e);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <MapView
