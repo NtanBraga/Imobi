@@ -1,8 +1,8 @@
 import { useLocation, useMap, useUI } from '@/hooks';
 import { ModoLocomocao, ModoVisualizacao } from '@/models';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function Map() {
   const { modoLocomocao, setModoLocomocao, modoVisualizacao, setModoVisualizacao } = useMap();
@@ -10,23 +10,35 @@ export default function Map() {
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
   const { abrirTab, tabAtiva } = useUI();
 
+  //Mock de movimento GPS --DEV
+  const [devOffset, setDevOffset] = useState({ lat: 0, lng: 0 });
+
+  //Posicao final (combinar gps real com deslocamento dev)
+  const currentLocation = location
+    ? {
+        latitude: location.latitude + devOffset.lat,
+        longitude: location.longitude + devOffset.lng,
+      }
+    : null;
+
+  //Atualizar camera quando localizacao falsa/real mudar
   useEffect(() => {
-    if (location && mapRef.current) {
+    if (currentLocation && mapRef.current) {
       // Delta maior = Zoom menor; Delta menor = Zoom maior
       //Zoom menor para Carro, Zoom maior para A pé
       const deltaZoom = modoLocomocao == ModoLocomocao.TRANSITO ? 0.0015 : 0.003;
 
       mapRef.current.animateToRegion(
         {
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
           latitudeDelta: deltaZoom,
           longitudeDelta: deltaZoom,
         },
         1000,
       ); // 1000ms para animar
     }
-  }, [location, modoLocomocao]);
+  }, [currentLocation?.latitude, currentLocation?.longitude, modoLocomocao]);
 
   //Mock inicial ate o mapa carregar o gps
   const initialRegion = {
@@ -43,11 +55,24 @@ export default function Map() {
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         initialRegion={initialRegion}
-        showsUserLocation={true} //Aguardando GPS usuario
+        showsUserLocation={!__DEV__}
         showsCompass={false}
         showsMyLocationButton={false}
-        //TODO: zoom e angulo da camera
-      />
+        //TODO: angulo da camera
+      >
+        {/*Marcador Dev*/}
+        {__DEV__ && currentLocation && (
+          <Marker coordinate={currentLocation} anchor={{ x: 0.5, y: 0.5 }}>
+            <View style={styles.blueDotContainer}>
+              {/*Aura de precisao*/}
+              <View style={styles.blueDotAura} />
+
+              {/*Nucleo*/}
+              <View style={styles.blueDotCore} />
+            </View>
+          </Marker>
+        )}
+      </MapView>
 
       {/*Controles*/}
       <View style={styles.topControls}>
@@ -128,6 +153,41 @@ export default function Map() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/*D-PAD DEVELOPER*/}
+      {__DEV__ && tabAtiva === 'NENHUM' && (
+        <View style={styles.dpadContainer}>
+          <TouchableOpacity
+            style={styles.dpadBtn}
+            onPress={() => setDevOffset((p) => ({ ...p, lat: p.lat + 0.00001 }))}
+          >
+            <Text style={styles.dpadText}>⬆️</Text>
+          </TouchableOpacity>
+
+          <View style={styles.dpadRow}>
+            <TouchableOpacity
+              style={styles.dpadBtn}
+              onPress={() => setDevOffset((p) => ({ ...p, lng: p.lng - 0.00001 }))}
+            >
+              <Text style={styles.dpadText}>⬅️</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dpadBtn}
+              onPress={() => setDevOffset((p) => ({ ...p, lng: p.lng + 0.00001 }))}
+            >
+              <Text style={styles.dpadText}>➡️</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.dpadBtn}
+            onPress={() => setDevOffset((p) => ({ ...p, lat: p.lat - 0.00001 }))}
+          >
+            <Text style={styles.dpadText}>⬇️</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -201,5 +261,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     zIndex: 10,
+  },
+  blueDotContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  blueDotAura: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(66, 133, 244, 0.2)',
+  },
+  blueDotCore: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#4285F4',
+    borderWidth: 3,
+    borderColor: 'white',
+    elevation: 5,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  dpadContainer: {
+    position: 'absolute',
+    bottom: 120,
+    alignSelf: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    padding: 10,
+    borderRadius: 60,
+    zIndex: 5,
+  },
+  dpadRow: {
+    flexDirection: 'row',
+    gap: 35,
+    marginVertical: 4,
+  },
+  dpadBtn: {
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 10,
+  },
+  dpadText: {
+    fontSize: 16,
   },
 });
