@@ -12,6 +12,22 @@ export default function Map() {
 
   //Mock de movimento GPS --DEV
   const [devOffset, setDevOffset] = useState({ lat: 0, lng: 0 });
+  const moveInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  //Movimento --DEV
+  const startMoving = (dLat: number, dLng: number) => {
+    stopMoving();
+    moveInterval.current = setInterval(() => {
+      setDevOffset((prev) => ({ lat: prev.lat + dLat, lng: prev.lng + dLng }));
+    }, 40);
+  };
+
+  const stopMoving = () => {
+    if (moveInterval.current) {
+      clearInterval(moveInterval.current);
+      moveInterval.current = null;
+    }
+  };
 
   //Posicao final (combinar gps real com deslocamento dev)
   const currentLocation = location
@@ -159,7 +175,9 @@ export default function Map() {
         <View style={styles.dpadContainer}>
           <TouchableOpacity
             style={styles.dpadBtn}
-            onPress={() => setDevOffset((p) => ({ ...p, lat: p.lat + 0.00001 }))}
+            onPressIn={() => startMoving(0.00001, 0)}
+            onPressOut={stopMoving}
+            activeOpacity={0.6}
           >
             <Text style={styles.dpadText}>⬆️</Text>
           </TouchableOpacity>
@@ -167,14 +185,18 @@ export default function Map() {
           <View style={styles.dpadRow}>
             <TouchableOpacity
               style={styles.dpadBtn}
-              onPress={() => setDevOffset((p) => ({ ...p, lng: p.lng - 0.00001 }))}
+              onPressIn={() => startMoving(0, -0.00001)}
+              onPressOut={stopMoving}
+              activeOpacity={0.6}
             >
               <Text style={styles.dpadText}>⬅️</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.dpadBtn}
-              onPress={() => setDevOffset((p) => ({ ...p, lng: p.lng + 0.00001 }))}
+              onPressIn={() => startMoving(0, 0.00001)}
+              onPressOut={stopMoving}
+              activeOpacity={0.6}
             >
               <Text style={styles.dpadText}>➡️</Text>
             </TouchableOpacity>
@@ -182,7 +204,9 @@ export default function Map() {
 
           <TouchableOpacity
             style={styles.dpadBtn}
-            onPress={() => setDevOffset((p) => ({ ...p, lat: p.lat - 0.00001 }))}
+            onPressIn={() => startMoving(-0.00001, 0)}
+            onPressOut={stopMoving}
+            activeOpacity={0.6}
           >
             <Text style={styles.dpadText}>⬇️</Text>
           </TouchableOpacity>
@@ -263,13 +287,15 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   blueDotContainer: {
+    width: 48,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
   },
   blueDotAura: {
     position: 'absolute',
-    width: 48,
-    height: 48,
+    width: '100%',
+    height: '100%',
     borderRadius: 24,
     backgroundColor: 'rgba(66, 133, 244, 0.2)',
   },
@@ -292,7 +318,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.7)',
-    padding: 10,
+    padding: 2,
     borderRadius: 60,
     zIndex: 5,
   },
@@ -303,7 +329,7 @@ const styles = StyleSheet.create({
   },
   dpadBtn: {
     backgroundColor: 'white',
-    padding: 8,
+    padding: 12,
     borderRadius: 10,
   },
   dpadText: {
