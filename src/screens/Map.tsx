@@ -293,6 +293,13 @@ export default function Map() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/*BOTAO LIMPAR DB DEVELOPER*/}
+      {isEnabledDevMode && tabAtiva === 'NENHUM' && (
+        <TouchableOpacity style={styles.deleteDb} onPress={limparBancodeDados}>
+          <Text style={styles.deleteDbText}>Limpar DB</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -415,5 +422,18 @@ const styles = StyleSheet.create({
   },
   dpadText: {
     fontSize: 16,
+  },
+  deleteDb: {
+    position: 'absolute',
+    top: 130,
+    left: 20,
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 10,
+    zIndex: 10,
+  },
+  deleteDbText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
