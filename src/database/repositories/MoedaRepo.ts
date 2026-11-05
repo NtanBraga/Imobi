@@ -27,4 +27,7 @@ export const MoedaRepository = {
   marcarComoColetada: async (db: SQLite.SQLiteDatabase, id: string): Promise<void> => {
     await db.runAsync('UPDATE Moeda SET coletada = 1 WHERE id = ?', [id]);
   },
+  deletar: async (db: SQLite.SQLiteDatabase, id: string): Promise<void> => {
+    await db.runAsync('DELETE FROM Moeda WHERE id = ?', [id]);
+  },
 };
