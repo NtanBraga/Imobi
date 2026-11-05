@@ -1,4 +1,5 @@
-import { VALOR_PADRAO_MOEDA } from '@/constants/moedas';
+import { calcularDistancia } from '@/components/distancia';
+import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
 import { LojaRepository, MoedaRepository, OcorrenciaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI, useWallet } from '@/hooks';
@@ -87,8 +88,8 @@ export default function Map() {
         if (moedasDB.length === 0 && currentLocation) {
           const novasMoedas: Moeda[] = Array.from({ length: 10 }).map(() => {
             //Deslocamento
-            const offsetLat = Math.random() - 0.5 * 0.004;
-            const offsetLng = Math.random() - 0.5 * 0.004;
+            const offsetLat = (Math.random() - 0.5) * 0.004;
+            const offsetLng = (Math.random() - 0.5) * 0.004;
 
             return {
               id: Math.random().toString(36).substring(2, 9),
@@ -109,6 +110,38 @@ export default function Map() {
       carregarMarcadores();
     }
   }, [tabAtiva, location]);
+
+  //Sistema de gamificação
+  useEffect(() => {
+    if (!currentLocation || moedas.length === 0) return;
+
+    //Verifica distancia de moedas e remove do mapa localmente
+
+    const verificarColetas = async () => {
+      let moedasRestantes = [...moedas];
+      let coletouAlguma = false;
+      const database = await db;
+
+      for (const moeda of moedas) {
+        const dist = calcularDistancia(
+          currentLocation.latitude,
+          currentLocation.longitude,
+          moeda.latitude,
+          moeda.longitude,
+        );
+
+        if (dist <= RAIO_COLETA_MOEDA_METROS) {
+          await MoedaRepository.marcarComoColetada(database, moeda.id);
+          creditar(moeda.valor);
+
+          moedasRestantes = moedasRestantes.filter((m) => m.id !== moeda.id);
+          coletouAlguma = true;
+        }
+      }
+      if (coletouAlguma) setMoedas(moedasRestantes);
+    };
+    verificarColetas();
+  }, [currentLocation?.latitude, currentLocation?.longitude, moedas]);
 
   //Cores dos marcadores baseado por ocorrencia
   const getCorOcorrencia = (tipo: TipoOcorrencia) => {
@@ -195,6 +228,20 @@ export default function Map() {
             description={lj.categoria}
             pinColor="cyan"
           />
+        ))}
+
+        {/*Renderizar moedas*/}
+        {moedas.map((moeda) => (
+          <Marker
+            key={moeda.id}
+            coordinate={{ latitude: moeda.latitude, longitude: moeda.longitude }}
+            title="Moeda"
+            description={`+${moeda.valor} moedas`}
+          >
+            <View style={styles.moedaIcon}>
+              <Text style={styles.moedaText}>🪙</Text>
+            </View>
+          </Marker>
         ))}
       </MapView>
 
@@ -462,5 +509,16 @@ const styles = StyleSheet.create({
   deleteDbText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  moedaIcon: {
+    backgroundColor: 'gold',
+    padding: 5,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#d97706',
+  },
+  moedaText: {
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 });
