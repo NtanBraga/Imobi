@@ -1,7 +1,8 @@
+import { VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
-import { LojaRepository, OcorrenciaRepository } from '@/database/repositories';
-import { useLocation, useMap, useUI } from '@/hooks';
-import { Loja, ModoLocomocao, ModoVisualizacao, Ocorrencia, TipoOcorrencia } from '@/models';
+import { LojaRepository, MoedaRepository, OcorrenciaRepository } from '@/database/repositories';
+import { useLocation, useMap, useUI, useWallet } from '@/hooks';
+import { Loja, ModoLocomocao, ModoVisualizacao, Moeda, Ocorrencia, TipoOcorrencia } from '@/models';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -69,6 +70,8 @@ export default function Map() {
   //Buscar dados no SQLite quando nenhuma tab ativa (para marcadores)
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [lojas, setLojas] = useState<Loja[]>([]);
+  const { creditar } = useWallet();
+  const [moedas, setMoedas] = useState<Moeda[]>([]);
 
   useEffect(() => {
     if (tabAtiva === 'NENHUM') {
@@ -76,12 +79,36 @@ export default function Map() {
         const database = await db;
         const ocorrenciasDB = await OcorrenciaRepository.buscarTodas(database);
         const lojasDB = await LojaRepository.buscarTodas(database);
+        let moedasDB = await MoedaRepository.buscarDisponiveis(database);
+
+        //Se nenhuma moeda, porem com localizacao
+        // gerar uma quantia exata de moedas no mapa
+
+        if (moedasDB.length === 0 && currentLocation) {
+          const novasMoedas: Moeda[] = Array.from({ length: 10 }).map(() => {
+            //Deslocamento
+            const offsetLat = Math.random() - 0.5 * 0.004;
+            const offsetLng = Math.random() - 0.5 * 0.004;
+
+            return {
+              id: Math.random().toString(36).substring(2, 9),
+              valor: VALOR_PADRAO_MOEDA,
+              coletada: false,
+              latitude: currentLocation.latitude + offsetLat,
+              longitude: currentLocation.longitude + offsetLng,
+            };
+          });
+          await MoedaRepository.criarEmLote(database, novasMoedas);
+          moedasDB = novasMoedas;
+        }
+
         setOcorrencias(ocorrenciasDB);
         setLojas(lojasDB);
+        setMoedas(moedasDB);
       };
       carregarMarcadores();
     }
-  }, [tabAtiva]);
+  }, [tabAtiva, location]);
 
   //Cores dos marcadores baseado por ocorrencia
   const getCorOcorrencia = (tipo: TipoOcorrencia) => {
