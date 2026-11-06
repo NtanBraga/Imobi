@@ -37,6 +37,7 @@ export default ({config}: ConfigContext): ExpoConfig => ({
         'expo-sqlite',
         'expo-secure-store',
         'expo-audio',
+        "expo-splash-screen",
         [
             'expo-location',
             {

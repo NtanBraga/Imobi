@@ -17,6 +17,7 @@ export default function Map() {
   //Mock de movimento GPS --DEV
   const [devOffset, setDevOffset] = useState({ lat: 0, lng: 0 });
   const moveInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerGamificacao = useRef<number>(0);
   const isEnabledDevMode = true;
 
   const startMoving = (dLat: number, dLng: number) => {
@@ -111,15 +112,20 @@ export default function Map() {
     }
   }, [tabAtiva, location]);
 
-  //Sistema de gamificação
+  //Sistema de gamificação (Logica de moedas)
   useEffect(() => {
-    if (!currentLocation || moedas.length === 0) return;
+    if (!currentLocation) return;
+
+    //Evitar spam de verificação de spawn
+    const agora = Date.now();
+    if (agora - timerGamificacao.current < 1000) return;
+    timerGamificacao.current = agora;
 
     //Verifica distancia de moedas e remove do mapa localmente
 
     const verificarColetas = async () => {
       let moedasRestantes = [...moedas];
-      let coletouAlguma = false;
+      let estadoAlterado = false;
       const database = await db;
 
       for (const moeda of moedas) {
@@ -135,10 +141,47 @@ export default function Map() {
           creditar(moeda.valor);
 
           moedasRestantes = moedasRestantes.filter((m) => m.id !== moeda.id);
-          coletouAlguma = true;
+          estadoAlterado = true;
+        } else if (dist > 250) {
+          //remove moeda se muito longe
+          await MoedaRepository.deletar(database, moeda.id);
+          moedasRestantes = moedasRestantes.filter((m) => m.id !== moeda.id);
+          estadoAlterado = true;
         }
       }
-      if (coletouAlguma) setMoedas(moedasRestantes);
+
+      //Spawn dinamico
+      const novasMoedas: Moeda[] = [];
+      let qtdAtual = moedasRestantes.length;
+
+      while (qtdAtual < 10) {
+        // Se tiver >5 moedas no mapa, forçar spawn. Se não chande de 20%
+        const chanceSpawn = qtdAtual < 5 ? 1.0 : 0.2;
+
+        if (Math.random() <= chanceSpawn) {
+          const offsetLat = (Math.random() - 0.5) * 0.004;
+          const offsetLng = (Math.random() - 0.5) * 0.004;
+
+          novasMoedas.push({
+            id: Math.random().toString(36).substring(2, 9),
+            valor: VALOR_PADRAO_MOEDA,
+            coletada: false,
+            latitude: currentLocation.latitude + offsetLat,
+            longitude: currentLocation.longitude + offsetLng,
+          });
+          qtdAtual++;
+        } else {
+          if (qtdAtual >= 5) break;
+        }
+      }
+
+      if (novasMoedas.length > 0) {
+        await MoedaRepository.criarEmLote(database, novasMoedas);
+        moedasRestantes = [...moedasRestantes, ...novasMoedas];
+        estadoAlterado = true;
+      }
+
+      if (estadoAlterado) setMoedas(moedasRestantes);
     };
     verificarColetas();
   }, [currentLocation?.latitude, currentLocation?.longitude, moedas]);
