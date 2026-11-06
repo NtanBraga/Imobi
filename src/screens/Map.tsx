@@ -158,7 +158,7 @@ export default function Map() {
 
   //Sistema de gamificação (Logica de moedas)
   useEffect(() => {
-    if (!currentLocation || modoVisualizacao === ModoVisualizacao.OFF) return;
+    if (!currentLocation) return;
 
     //Evitar spam de verificação de spawn
     const agora = Date.now();
@@ -174,6 +174,31 @@ export default function Map() {
         let moedasRestantes = [...moedas];
         let estadoAlterado = false;
         const database = await db;
+
+        //Sensor de Ocorrencias Proximas - VALIDACAO
+        let alertaEncontrado: Ocorrencia | null = null;
+
+        for (const oc of ocorrencias) {
+          if (ocorrenciasValidadas.current.has(oc.id)) continue;
+
+          const dist = calcularDistancia(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            oc.latitude,
+            oc.longitude,
+          );
+
+          if (dist <= 30) {
+            alertaEncontrado = oc;
+            break;
+          }
+        }
+
+        if (alertaEncontrado?.id !== ocorrenciaProxima?.id) {
+          setOcorrenciaProxima(alertaEncontrado);
+        }
+
+        if (modoVisualizacao === ModoVisualizacao.OFF) return;
 
         for (const moeda of moedas) {
           const dist = calcularDistancia(
@@ -197,29 +222,6 @@ export default function Map() {
             moedasRestantes = moedasRestantes.filter((m) => m.id !== moeda.id);
             estadoAlterado = true;
           }
-        }
-
-        //Sensor de Ocorrencias Proximas - VALIDACAO
-        let alertaEncontrado: Ocorrencia | null = null;
-
-        for (const oc of ocorrencias) {
-          if (ocorrenciasValidadas.current.has(oc.id)) continue;
-
-          const dist = calcularDistancia(
-            currentLocation.latitude,
-            currentLocation.longitude,
-            oc.latitude,
-            oc.longitude,
-          );
-
-          if (dist <= 30) {
-            alertaEncontrado = oc;
-            break;
-          }
-        }
-
-        if (alertaEncontrado?.id !== ocorrenciaProxima?.id) {
-          setOcorrenciaProxima(alertaEncontrado);
         }
 
         //Spawn dinamico
@@ -269,7 +271,13 @@ export default function Map() {
       }
     };
     verificarColetas();
-  }, [currentLocation?.latitude, currentLocation?.longitude, moedas]);
+  }, [
+    currentLocation?.latitude,
+    currentLocation?.longitude,
+    moedas,
+    ocorrencias,
+    modoVisualizacao,
+  ]);
 
   //Cores dos marcadores baseado por ocorrencia
   const getCorOcorrencia = (tipo: TipoOcorrencia) => {
@@ -444,7 +452,10 @@ export default function Map() {
             >
               <Text style={styles.validacaoBtnText}>Sim</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.validacaoBtn, { backgroundColor: 'red' }]}>
+            <TouchableOpacity
+              style={[styles.validacaoBtn, { backgroundColor: 'red' }]}
+              onPress={() => responderValidacao('NAO')}
+            >
               <Text style={styles.validacaoBtnText}>Não</Text>
             </TouchableOpacity>
           </View>
