@@ -72,7 +72,7 @@ export default function Map() {
   //Buscar dados no SQLite quando nenhuma tab ativa (para marcadores)
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [lojas, setLojas] = useState<Loja[]>([]);
-  const { creditar } = useWallet();
+  const { creditar, zerarSaldo } = useWallet();
   const [moedas, setMoedas] = useState<Moeda[]>([]);
 
   useEffect(() => {
@@ -221,6 +221,10 @@ export default function Map() {
 
       setOcorrencias([]);
       setLojas([]);
+      setMoedas([]);
+
+      if (zerarSaldo) zerarSaldo();
+
       alert('Base de dados limpa com sucesso.');
     } catch (e) {
       console.error('Erro ao limpar banco:', e);

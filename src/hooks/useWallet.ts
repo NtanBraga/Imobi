@@ -8,6 +8,7 @@ interface WalletState {
   carregarSaldo: () => void;
   creditar: (valor: number) => void;
   debitar: (valor: number) => void;
+  zerarSaldo: () => void;
 }
 
 const WALLET_MVP = 'wallet-mvp';
@@ -54,4 +55,5 @@ export const useWallet = create<WalletState>((set, get) => ({
       }
     }
   },
+  zerarSaldo: () => set({ saldo: 0 }),
 }));
