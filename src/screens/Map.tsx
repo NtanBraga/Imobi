@@ -160,11 +160,22 @@ export default function Map() {
         const novasMoedas: Moeda[] = [];
         let qtdAtual = moedasRestantes.length;
 
-        while (qtdAtual < 10) {
-          // Se tiver >5 moedas no mapa, forçar spawn. Se não chande de 20%
-          const chanceSpawn = qtdAtual < 5 ? 1.0 : 0.2;
+        while (qtdAtual < 5) {
+          const offsetLat = (Math.random() - 0.5) * 0.004;
+          const offsetLng = (Math.random() - 0.5) * 0.004;
 
-          if (Math.random() <= chanceSpawn) {
+          novasMoedas.push({
+            id: Math.random().toString(36).substring(2, 9),
+            valor: VALOR_PADRAO_MOEDA,
+            coletada: false,
+            latitude: currentLocation.latitude + offsetLat,
+            longitude: currentLocation.longitude + offsetLng,
+          });
+          qtdAtual++;
+        }
+
+        if (qtdAtual >= 5 && qtdAtual < 10) {
+          if (Math.random() <= 0.3) {
             const offsetLat = (Math.random() - 0.5) * 0.004;
             const offsetLng = (Math.random() - 0.5) * 0.004;
 
@@ -175,9 +186,6 @@ export default function Map() {
               latitude: currentLocation.latitude + offsetLat,
               longitude: currentLocation.longitude + offsetLng,
             });
-            qtdAtual++;
-          } else {
-            if (qtdAtual >= 5) break;
           }
         }
 
