@@ -1,6 +1,6 @@
 import { db } from '@/database';
 import { LojaRepository } from '@/database/repositories';
-import { useLocation, useUI, useWallet } from '@/hooks';
+import { useLocation, useMap, useUI, useWallet } from '@/hooks';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -17,6 +17,8 @@ export function LojaBottomSheet() {
   const { location } = useLocation();
   const { creditar } = useWallet();
 
+  const { coordenadaFoco } = useMap();
+
   useEffect(() => {
     if (tabAtiva === 'LOJA') {
       isMountedRef.current = true;
@@ -31,7 +33,7 @@ export function LojaBottomSheet() {
   const registrarLoja = async () => {
     if (!nomeLoja || !categoria) return;
 
-    if (!location) {
+    if (!coordenadaFoco) {
       Alert.alert('Aviso', 'Aguardando sinal de GPS...');
       return;
     }
@@ -41,8 +43,8 @@ export function LojaBottomSheet() {
       id: Math.random().toString(36).substring(2, 9),
       nome: nomeLoja,
       categoria: categoria,
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude: coordenadaFoco.latitude,
+      longitude: coordenadaFoco.longitude,
     };
 
     const sucesso = await LojaRepository.criar(database, novaLoja);

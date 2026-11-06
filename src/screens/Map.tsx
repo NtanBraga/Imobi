@@ -10,7 +10,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function Map() {
-  const { modoLocomocao, setModoLocomocao, modoVisualizacao, setModoVisualizacao } = useMap();
+  const {
+    modoLocomocao,
+    setModoLocomocao,
+    modoVisualizacao,
+    setModoVisualizacao,
+    coordenadaFoco,
+    setCoordenadaFoco,
+  } = useMap();
   const { location } = useLocation();
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
   const { abrirTab, tabAtiva } = useUI();
@@ -370,7 +377,10 @@ export default function Map() {
           {/*OCORRENCIA*/}
           <TouchableOpacity
             style={[styles.tabButtons, { backgroundColor: 'cyan' }]}
-            onPress={() => abrirTab('LOJA')}
+            onPress={() => {
+              if (currentLocation) setCoordenadaFoco(currentLocation);
+              abrirTab('LOJA');
+            }}
             activeOpacity={0.8}
           >
             <Text style={styles.tabButtonText}>L</Text>
@@ -379,7 +389,10 @@ export default function Map() {
           {/*LOJA*/}
           <TouchableOpacity
             style={[styles.tabButtons, { backgroundColor: 'orange' }]}
-            onPress={() => abrirTab('OCORRENCIA')}
+            onPress={() => {
+              if (currentLocation) setCoordenadaFoco(currentLocation);
+              abrirTab('OCORRENCIA');
+            }}
             activeOpacity={0.8}
           >
             <Text style={styles.tabButtonText}>O</Text>

@@ -1,6 +1,6 @@
 import { db } from '@/database';
 import { OcorrenciaRepository } from '@/database/repositories';
-import { useLocation, useUI, useWallet } from '@/hooks';
+import { useLocation, useMap, useUI, useWallet } from '@/hooks';
 import { StatusOcorrencia, TipoOcorrencia } from '@/models';
 import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
@@ -13,6 +13,7 @@ export function OcorrenciaBottomSheet() {
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoOcorrencia | null>(null);
   const { location } = useLocation();
   const { creditar } = useWallet();
+  const { coordenadaFoco } = useMap();
 
   //controlar abertura/fechamento
   useEffect(() => {
@@ -28,7 +29,7 @@ export function OcorrenciaBottomSheet() {
   const confirmarReport = async () => {
     if (!tipoSelecionado) return;
 
-    if (!location) {
+    if (!coordenadaFoco) {
       Alert.alert('Aviso', 'Aguardando sinal de GPS...');
       return;
     }
@@ -40,8 +41,8 @@ export function OcorrenciaBottomSheet() {
       descricao: '', // durante o MVP ele vai ficar como opcional
       status: StatusOcorrencia.ATIVA,
       dataCriacao: new Date(),
-      latitude: location.latitude,
-      longitude: location.longitude,
+      latitude: coordenadaFoco.latitude,
+      longitude: coordenadaFoco.longitude,
     };
 
     const sucesso = await OcorrenciaRepository.criar(database, novaOcorrencia);
