@@ -199,6 +199,29 @@ export default function Map() {
           }
         }
 
+        //Sensor de Ocorrencias Proximas - VALIDACAO
+        let alertaEncontrado: Ocorrencia | null = null;
+
+        for (const oc of ocorrencias) {
+          if (ocorrenciasValidadas.current.has(oc.id)) continue;
+
+          const dist = calcularDistancia(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            oc.latitude,
+            oc.longitude,
+          );
+
+          if (dist <= 30) {
+            alertaEncontrado = oc;
+            break;
+          }
+        }
+
+        if (alertaEncontrado?.id !== ocorrenciaProxima?.id) {
+          setOcorrenciaProxima(alertaEncontrado);
+        }
+
         //Spawn dinamico
         const novasMoedas: Moeda[] = [];
         let qtdAtual = moedasRestantes.length;
@@ -405,6 +428,28 @@ export default function Map() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/*Alerta de validacao de ocorrencia*/}
+      {ocorrenciaProxima && (
+        <View style={styles.validacaoContainer}>
+          <Text style={styles.validacaoTitle}>Atenção</Text>
+          <Text style={styles.validacaoText}>
+            Um(a) {ocorrenciaProxima.tipo.replace('_', ' ').toLowerCase()} foi reportado(a) aqui.
+            Ainda existe?
+          </Text>
+          <View style={styles.validacaoRow}>
+            <TouchableOpacity
+              style={[styles.validacaoBtn, { backgroundColor: 'green' }]}
+              onPress={() => responderValidacao('SIM')}
+            >
+              <Text style={styles.validacaoBtnText}>Sim</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.validacaoBtn, { backgroundColor: 'red' }]}>
+              <Text style={styles.validacaoBtnText}>Não</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/*Botoes flutuantes*/}
       {tabAtiva === 'NENHUM' && (
@@ -638,5 +683,48 @@ const styles = StyleSheet.create({
   moedaText: {
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  validacaoContainer: {
+    position: 'absolute',
+    top: 130,
+    left: 20,
+    right: 20,
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 15,
+    elevation: 10,
+    shadowColor: 'black',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    zIndex: 20,
+    borderLeftWidth: 5,
+    borderLeftColor: 'red',
+  },
+  validacaoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
+  },
+  validacaoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 15,
+  },
+  validacaoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  validacaoBtn: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  validacaoBtnText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
