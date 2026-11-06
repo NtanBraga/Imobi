@@ -1,4 +1,5 @@
 import { calcularDistancia } from '@/components/distancia';
+import { MAPA_OFF_ESTILO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
 import { LojaRepository, MoedaRepository, OcorrenciaRepository } from '@/database/repositories';
@@ -115,7 +116,7 @@ export default function Map() {
 
   //Sistema de gamificação (Logica de moedas)
   useEffect(() => {
-    if (!currentLocation) return;
+    if (!currentLocation || modoVisualizacao === ModoVisualizacao.OFF) return;
 
     //Evitar spam de verificação de spawn
     const agora = Date.now();
@@ -261,6 +262,7 @@ export default function Map() {
         showsCompass={false}
         showsMyLocationButton={false}
         //TODO: angulo da camera
+        customMapStyle={modoVisualizacao === ModoVisualizacao.OFF ? MAPA_OFF_ESTILO : []}
       >
         {/*Marcador Dev*/}
         {isEnabledDevMode && currentLocation && (
@@ -286,29 +288,31 @@ export default function Map() {
         ))}
 
         {/*Renderizar lojas*/}
-        {lojas.map((lj) => (
-          <Marker
-            key={lj.id}
-            coordinate={{ latitude: lj.latitude, longitude: lj.longitude }}
-            title={lj.nome}
-            description={lj.categoria}
-            pinColor="cyan"
-          />
-        ))}
+        {modoVisualizacao === ModoVisualizacao.ON &&
+          lojas.map((lj) => (
+            <Marker
+              key={lj.id}
+              coordinate={{ latitude: lj.latitude, longitude: lj.longitude }}
+              title={lj.nome}
+              description={lj.categoria}
+              pinColor="cyan"
+            />
+          ))}
 
         {/*Renderizar moedas*/}
-        {moedas.map((moeda) => (
-          <Marker
-            key={moeda.id}
-            coordinate={{ latitude: moeda.latitude, longitude: moeda.longitude }}
-            title="Moeda"
-            description={`+${moeda.valor} moedas`}
-          >
-            <View style={styles.moedaIcon}>
-              <Text style={styles.moedaText}>🪙</Text>
-            </View>
-          </Marker>
-        ))}
+        {modoVisualizacao === ModoVisualizacao.ON &&
+          moedas.map((moeda) => (
+            <Marker
+              key={moeda.id}
+              coordinate={{ latitude: moeda.latitude, longitude: moeda.longitude }}
+              title="Moeda"
+              description={`+${moeda.valor} moedas`}
+            >
+              <View style={styles.moedaIcon}>
+                <Text style={styles.moedaText}>🪙</Text>
+              </View>
+            </Marker>
+          ))}
       </MapView>
 
       {/*Controles*/}
