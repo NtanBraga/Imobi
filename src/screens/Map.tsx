@@ -84,6 +84,41 @@ export default function Map() {
   const { creditar, zerarSaldo } = useWallet();
   const [moedas, setMoedas] = useState<Moeda[]>([]);
 
+  //Validação comunitaria
+  const [ocorrenciaProxima, setOcorrenciaProxima] = useState<Ocorrencia | null>(null);
+  const ocorrenciasValidadas = useRef<Set<string>>(new Set());
+
+  const responderValidacao = async (resposta: 'SIM' | 'NAO') => {
+    if (!ocorrenciaProxima) return;
+
+    try {
+      const database = await db;
+      const idValidacao = Math.random().toString(36).substring(2, 9);
+
+      await database.runAsync(
+        'INSERT INTO ConfirmacaoOcorrencia (id, ocorrenciaId, usuarioId, tipo, data) VALUES (?, ?, ?, ?, ?)',
+        [idValidacao, ocorrenciaProxima.id, 'user-mvp', resposta, new Date().toISOString()],
+      );
+
+      if (resposta == 'NAO') {
+        await OcorrenciaRepository.atualizarStatus(
+          database,
+          ocorrenciaProxima.id,
+          'RESOLVIDA' as any,
+        );
+        setOcorrencias((prev) => prev.filter((oc) => oc.id !== ocorrenciaProxima.id));
+      }
+
+      creditar(15);
+      ocorrenciasValidadas.current.add(ocorrenciaProxima.id);
+      setOcorrenciaProxima(null);
+
+      alert('Obrigado pela ajuda! +15 moedas.');
+    } catch (e) {
+      console.error('Erro ao validar ocorrencia: ', e);
+    }
+  };
+
   useEffect(() => {
     if (tabAtiva === 'NENHUM') {
       const carregarMarcadores = async () => {
