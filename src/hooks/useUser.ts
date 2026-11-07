@@ -19,8 +19,9 @@ export const useUser = create<UserState>((set) => ({
   setUsuario: async () => {
     const database = await db;
     const usuario = await UsuarioRepository.buscarUsuario(database, USER_MVP);
+    const inventario = await UsuarioRepository.buscarInventario(database, USER_MVP);
 
-    if (usuario) set({ usuarioAtivo: usuario });
+    if (usuario) set({ usuarioAtivo: usuario, inventarioAvatares: inventario });
   },
   selecionarAvatar: async (avatarId) => {
     const database = await db;
