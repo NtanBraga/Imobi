@@ -1,10 +1,11 @@
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
 import { initializeDatabase } from '@/database';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { NavigationBar } from 'expo-navigation-bar';
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function StackLayout() {
   const [isDbReady, setIsDbReady] = useState(false);
@@ -33,6 +34,10 @@ export default function StackLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <BottomSheetModalProvider>
+        {/*Controladores de tela*/}
+        <StatusBar hidden />
+        <NavigationBar hidden />
+
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
         </Stack>
