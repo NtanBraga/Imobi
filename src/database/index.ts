@@ -13,9 +13,27 @@ export const initializeDatabase = async (): Promise<void> => {
 
     await database.execAsync(DATABASE_SCHEMA);
 
+    //Por questão de testes, os avatares por enquanto serão emotes
+    //futuramente trocar por imagens
+
+    await database.runAsync(
+      `INSERT OR IGNORE INTO Avatar(id, nome, imagem, custoMoedas) VALUES ('av-1', 'Explorador', '👦', 0)`,
+    );
+    await database.runAsync(
+      `INSERT OR IGNORE INTO Avatar(id, nome, imagem, custoMoedas) VALUES ('av-2', 'Motorista', '🚗', 50)`,
+    );
+    await database.runAsync(
+      `INSERT OR IGNORE INTO Avatar(id, nome, imagem, custoMoedas) VALUES ('av-3', 'Policial', '🚓', 100)`,
+    );
+    await database.runAsync(
+      `INSERT OR IGNORE INTO Avatar(id, nome, imagem, custoMoedas) VALUES ('av-4', 'Prefeito', '🏛️', 500)`,
+    );
+
     //Mock Injetar usuario e carteira MVP
 
-    await database.runAsync(`INSERT OR IGNORE INTO Usuario (id, nome) VALUES ('user-mvp', 'Bob')`);
+    await database.runAsync(
+      `INSERT OR IGNORE INTO Usuario (id, nome, avatarId) VALUES ('user-mvp', 'Bob', 'av-1')`,
+    );
 
     await database.runAsync(
       `INSERT OR IGNORE INTO Carteira (id, usuarioId, saldo) VALUES ('wallet-mvp', 'user-mvp', 0)`,
