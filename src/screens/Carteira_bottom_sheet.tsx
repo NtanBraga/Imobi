@@ -2,7 +2,7 @@ import { db } from '@/database';
 import { AvatarRepository } from '@/database/repositories/AvatarRepo';
 import { useUI, useUser, useWallet } from '@/hooks';
 import { Avatar } from '@/models';
-import { BottomSheetBackdrop, BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -12,7 +12,7 @@ export function CarteiraBottomSheet() {
 
   const { tabAtiva, fecharTabs } = useUI();
   const { saldo, creditar, debitar } = useWallet();
-  const { usuarioAtivo, selecionarAvatar } = useUser();
+  const { usuarioAtivo, selecionarAvatar, inventarioAvatares, comprarAvatar } = useUser();
 
   //estado avatares
   const [avatares, setAvatares] = useState<Avatar[]>([]);
@@ -49,6 +49,11 @@ export function CarteiraBottomSheet() {
   const handleComprar = (avatar: Avatar) => {
     if (usuarioAtivo?.avatarId === avatar.id) return;
 
+    if (inventarioAvatares.includes(avatar.id)) {
+      selecionarAvatar(avatar.id);
+      return;
+    }
+
     if (avatar.custoMoedas > 0) {
       if (saldo < avatar.custoMoedas) {
         Alert.alert(
@@ -70,6 +75,7 @@ export function CarteiraBottomSheet() {
             text: 'Comprar',
             onPress: async () => {
               await debitar(avatar.custoMoedas);
+              await comprarAvatar(avatar.id);
               await selecionarAvatar(avatar.id);
             },
           },
@@ -77,6 +83,7 @@ export function CarteiraBottomSheet() {
       );
     } else {
       //Se gratuito
+      comprarAvatar(avatar.id);
       selecionarAvatar(avatar.id);
     }
   };
@@ -124,7 +131,7 @@ export function CarteiraBottomSheet() {
       handleIndicatorStyle={{ backgroundColor: 'white', width: 40 }}
       backgroundStyle={{ borderRadius: 24 }}
     >
-      <BottomSheetFlashList
+      <BottomSheetFlatList
         data={avatares}
         keyExtractor={(item) => item.id}
         numColumns={2}
@@ -146,6 +153,10 @@ export function CarteiraBottomSheet() {
               {isEquipado ? (
                 <View style={styles.badgeEquipped}>
                   <Text style={styles.badgeText}>Equipado</Text>
+                </View>
+              ) : inventarioAvatares.includes(item.id) ? (
+                <View style={[styles.badgeEquipped, { backgroundColor: 'gray' }]}>
+                  <Text style={styles.badgeText}>Usar</Text>
                 </View>
               ) : (
                 <Text style={styles.cardPrice}>
