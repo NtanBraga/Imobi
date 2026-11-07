@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: 'white',
-    width: '60%',
+    width: '40%',
     padding: 10,
     borderRadius: 12,
     alignItems: 'center',
