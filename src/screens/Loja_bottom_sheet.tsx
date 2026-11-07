@@ -1,7 +1,7 @@
 import { db } from '@/database';
 import { LojaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI, useWallet } from '@/hooks';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -71,6 +71,11 @@ export function LojaBottomSheet() {
         isMountedRef.current = false;
         fecharTabs();
       }}
+      backdropComponent={(props) => (
+        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+      )}
+      handleIndicatorStyle={{ backgroundColor: 'black', width: 40 }}
+      backgroundStyle={{ borderRadius: 24 }}
     >
       <BottomSheetView style={styles.contentContainer}>
         <Text style={styles.title}>Registrar comércio</Text>

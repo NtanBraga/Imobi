@@ -128,7 +128,7 @@ export function CarteiraBottomSheet() {
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
       )}
-      handleIndicatorStyle={{ backgroundColor: 'white', width: 40 }}
+      handleIndicatorStyle={{ backgroundColor: 'black', width: 40 }}
       backgroundStyle={{ borderRadius: 24 }}
     >
       <BottomSheetFlatList
