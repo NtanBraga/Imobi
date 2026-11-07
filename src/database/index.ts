@@ -39,6 +39,10 @@ export const initializeDatabase = async (): Promise<void> => {
       `INSERT OR IGNORE INTO Carteira (id, usuarioId, saldo) VALUES ('wallet-mvp', 'user-mvp', 0)`,
     );
 
+    await database.runAsync(
+      `INSERT OR IGNORE INTO UsuarioAvatar (usuarioId, avatarId, dataCompra) VALUES ('user-mvp', 'av-1', '${new Date().toISOString()}')`,
+    );
+
     console.log('[DEBUG] Banco de dados inicializado com sucesso.');
   } catch (e) {
     console.error('Erro ao inicializar banco de dados:', e);

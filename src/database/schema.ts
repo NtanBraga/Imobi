@@ -15,6 +15,15 @@ export const DATABASE_SCHEMA = `
         FOREIGN KEY (avatarId) REFERENCES Avatar(id)
     );
 
+    CREATE TABLE IF NOT EXISTS UsuarioAvatar (
+        usuarioId TEXT NOT NULL,
+        avatarId TEXT NOT NULL,
+        dataCompra TEXT NOT NULL,
+        PRIMARY KEY (usuarioId, avatarId),
+        FOREIGN KEY (usuarioId) REFERENCES Usuario(id) ON DELETE CASCADE,
+        FOREIGN KEY (avatarId) REFERENCES Avatar(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS Carteira (
         id TEXT PRIMARY KEY,
         usuarioId TEXT NOT NULL,
