@@ -3,8 +3,17 @@ import { MAPA_OFF_ESTILO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
 import { LojaRepository, MoedaRepository, OcorrenciaRepository } from '@/database/repositories';
-import { useLocation, useMap, useUI, useWallet } from '@/hooks';
-import { Loja, ModoLocomocao, ModoVisualizacao, Moeda, Ocorrencia, TipoOcorrencia } from '@/models';
+import { AvatarRepository } from '@/database/repositories/AvatarRepo';
+import { useLocation, useMap, useUI, useUser, useWallet } from '@/hooks';
+import {
+  Avatar,
+  Loja,
+  ModoLocomocao,
+  ModoVisualizacao,
+  Moeda,
+  Ocorrencia,
+  TipoOcorrencia,
+} from '@/models';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -83,6 +92,11 @@ export default function Map() {
   const [lojas, setLojas] = useState<Loja[]>([]);
   const { creditar, zerarSaldo } = useWallet();
   const [moedas, setMoedas] = useState<Moeda[]>([]);
+  const { usuarioAtivo } = useUser();
+  const [avatares, setAvatares] = useState<Avatar[]>([]);
+
+  //Identificar avatar equipado no momento
+  const avatarEquipado = avatares.find((av) => av.id === usuarioAtivo?.avatarId);
 
   //Validação comunitaria
   const [ocorrenciaProxima, setOcorrenciaProxima] = useState<Ocorrencia | null>(null);
@@ -125,6 +139,7 @@ export default function Map() {
         const database = await db;
         const ocorrenciasDB = await OcorrenciaRepository.buscarTodas(database);
         const lojasDB = await LojaRepository.buscarTodas(database);
+        const avataresDB = await AvatarRepository.buscarTodos(database);
         let moedasDB = await MoedaRepository.buscarDisponiveis(database);
 
         //Se nenhuma moeda, porem com localizacao
@@ -150,6 +165,7 @@ export default function Map() {
 
         setOcorrencias(ocorrenciasDB);
         setLojas(lojasDB);
+        setAvatares(avataresDB);
         setMoedas(moedasDB);
       };
       carregarMarcadores();
@@ -339,13 +355,14 @@ export default function Map() {
       >
         {/*Marcador Dev*/}
         {isEnabledDevMode && currentLocation && (
-          <Marker coordinate={currentLocation} anchor={{ x: 0.5, y: 0.5 }}>
-            <View style={styles.blueDotContainer}>
-              {/*Aura de precisao*/}
-              <View style={styles.blueDotAura} />
-
-              {/*Nucleo*/}
-              <View style={styles.blueDotCore} />
+          <Marker
+            key={`player-${usuarioAtivo?.avatarId || 'default'}`}
+            coordinate={currentLocation}
+            anchor={{ x: 0.5, y: 0.5 }}
+          >
+            {/*Nucleo*/}
+            <View style={styles.avatarContainer}>
+              <Text style={styles.avatarMarketText}>{avatarEquipado?.imagem || '👦'}</Text>
             </View>
           </Marker>
         )}
@@ -622,31 +639,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     zIndex: 10,
   },
-  blueDotContainer: {
-    width: 48,
-    height: 48,
+  avatarContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 4,
   },
-  blueDotAura: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: 24,
-    backgroundColor: 'rgba(66, 133, 244, 0.2)',
-  },
-  blueDotCore: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#4285F4',
-    borderWidth: 3,
-    borderColor: 'white',
-    elevation: 5,
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+  avatarMarketText: {
+    fontSize: 32,
+    textAlign: 'center',
   },
   dpadContainer: {
     position: 'absolute',

@@ -1,4 +1,4 @@
-import { useWallet } from '@/hooks';
+import { useUser, useWallet } from '@/hooks';
 import { CarteiraBottomSheet } from '@/screens/Carteira_bottom_sheet';
 import { LojaBottomSheet } from '@/screens/Loja_bottom_sheet';
 import Map from '@/screens/Map';
@@ -9,10 +9,12 @@ import { StyleSheet, View } from 'react-native';
 
 export default function HomeScreen() {
   const { carregarSaldo } = useWallet();
+  const { setUsuario } = useUser();
 
-  //Buscar meodas salvas no SQLITE
+  //Buscar meodas salvas e usuario no SQLITE
   useEffect(() => {
     carregarSaldo();
+    setUsuario();
   }, []);
 
   return (
