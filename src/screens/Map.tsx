@@ -14,6 +14,7 @@ import {
   Ocorrencia,
   TipoOcorrencia,
 } from '@/models';
+import { Lucide } from '@react-native-vector-icons/lucide';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -29,7 +30,7 @@ export default function Map() {
   } = useMap();
   const { location } = useLocation();
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
-  const { abrirTab, tabAtiva } = useUI();
+  const { abrirTab, tabAtiva, fecharTabs } = useUI();
 
   //Mock de movimento GPS --DEV
   const [devOffset, setDevOffset] = useState({ lat: 0, lng: 0 });
@@ -479,42 +480,77 @@ export default function Map() {
         </View>
       )}
 
-      {/*Botoes flutuantes*/}
-      {tabAtiva === 'NENHUM' && (
-        <View style={styles.bottomControls}>
-          {/*OCORRENCIA*/}
-          <TouchableOpacity
-            style={[styles.tabButtons, { backgroundColor: 'cyan' }]}
-            onPress={() => {
-              if (currentLocation) setCoordenadaFoco(currentLocation);
-              abrirTab('LOJA');
-            }}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.tabButtonText}>L</Text>
+      {/*Botoes Navegacao*/}
+      <View style={styles.bottomNavContainer}>
+        <View style={styles.bottomNavBar}>
+          {/*Inicio mapa*/}
+          <TouchableOpacity style={styles.navItem} onPress={fecharTabs} activeOpacity={0.7}>
+            <Lucide name="home" size={24} color={tabAtiva === 'NENHUM' ? '#0d9488' : '#64748b'} />
+            <Text style={[styles.navText, tabAtiva === 'NENHUM' && styles.navTextActive]}>
+              Início
+            </Text>
           </TouchableOpacity>
 
-          {/*LOJA*/}
+          {/*Reportar Ocorrencia*/}
           <TouchableOpacity
-            style={[styles.tabButtons, { backgroundColor: 'orange' }]}
+            style={styles.navItem}
             onPress={() => {
               if (currentLocation) setCoordenadaFoco(currentLocation);
               abrirTab('OCORRENCIA');
             }}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
           >
-            <Text style={styles.tabButtonText}>O</Text>
+            <Lucide
+              name="message-circle-warning"
+              size={24}
+              color={tabAtiva === 'OCORRENCIA' ? '#0d9488' : '#64748b'}
+            />
+            <Text style={[styles.navText, tabAtiva === 'OCORRENCIA' && styles.navTextActive]}>
+              Reportar
+            </Text>
           </TouchableOpacity>
 
+          {/*Botão central (+)*/}
+          <View style={styles.plusButtonWrapper}>
+            <TouchableOpacity style={styles.plusButton} onPress={() => {}} activeOpacity={0.85}>
+              <Lucide name="plus" size={32} color={'white'} />
+            </TouchableOpacity>
+          </View>
+
+          {/*Registrar (estabelecimento)*/}
           <TouchableOpacity
-            style={[styles.tabButtons, { backgroundColor: 'green' }]}
-            onPress={() => abrirTab('CARTEIRA')}
-            activeOpacity={0.8}
+            style={styles.navItem}
+            onPress={() => {
+              if (currentLocation) setCoordenadaFoco(currentLocation);
+              abrirTab('LOJA');
+            }}
+            activeOpacity={0.7}
           >
-            <Text style={styles.tabButtonText}>C</Text>
+            <Lucide name="store" size={24} color={tabAtiva === 'LOJA' ? '#0d9488' : '#64748b'} />
+            <Text style={[styles.navText, tabAtiva === 'LOJA' && styles.navTextActive]}>
+              Registrar
+            </Text>
+          </TouchableOpacity>
+
+          {/*Perfil*/}
+          <TouchableOpacity
+            style={styles.navItem}
+            onPress={() => {
+              abrirTab('CARTEIRA');
+            }}
+            activeOpacity={0.7}
+          >
+            <Lucide
+              name="laugh"
+              size={24}
+              color={tabAtiva === 'CARTEIRA' ? '#0d9488' : '#64748b'}
+            />
+            <Text style={[styles.navText, tabAtiva === 'CARTEIRA' && styles.navTextActive]}>
+              Perfil
+            </Text>
           </TouchableOpacity>
         </View>
-      )}
+      </View>
 
       {/*D-PAD DEVELOPER*/}
       {isEnabledDevMode && tabAtiva === 'NENHUM' && (
@@ -572,6 +608,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   topControls: {
     position: 'absolute',
     top: 60,
@@ -617,27 +654,78 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0f1f7a',
   },
-  tabButtons: {
-    width: 64,
-    height: 64,
-    borderRadius: 30,
+  bottomNavContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  bottomNavBar: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    height: 76,
+    paddingBottom: 12,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    elevation: 16,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: -4 },
+    shadowRadius: 8,
+  },
+  navItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  navText: {
+    fontSize: 12,
+    color: '$64748b',
+    fontWeight: '500',
+  },
+  navTextActive: {
+    color: '0d9488',
+    fontWeight: '700',
+  },
+  plusButtonWrapper: {
+    width: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plusButton: {
+    top: -18,
+    width: 58,
+    height: 58,
+    borderRadius: 20,
+    backgroundColor: '#ef6c35',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 4,
+    borderColor: 'white',
     elevation: 8,
+    shadowColor: '#ef6c35',
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
   },
-  tabButtonText: {
-    fontSize: 30,
+  menuButton: {
+    backgroundColor: '#0f1f7a',
+    paddingVertical: 14,
+    paddingHorizontal: 36,
+    borderRadius: 30,
+    elevation: 8,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  menuButtonText: {
+    fontSize: 18,
     color: 'white',
     fontWeight: 'bold',
-  },
-  bottomControls: {
-    position: 'absolute',
-    bottom: 40,
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    zIndex: 10,
   },
   avatarContainer: {
     justifyContent: 'center',
