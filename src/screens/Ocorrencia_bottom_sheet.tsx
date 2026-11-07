@@ -21,6 +21,7 @@ export function OcorrenciaBottomSheet() {
       isMountedRef.current = true;
       bottomSheetRef.current?.present();
     } else if (isMountedRef.current) {
+      isMountedRef.current = false;
       bottomSheetRef.current?.dismiss();
       setTipoSelecionado(null); //resetar selecao
     }
@@ -64,8 +65,10 @@ export function OcorrenciaBottomSheet() {
       snapPoints={['65%']}
       enableDynamicSizing={false}
       onDismiss={() => {
-        isMountedRef.current = false;
-        fecharTabs();
+        if (isMountedRef.current) {
+          isMountedRef.current = false;
+          fecharTabs();
+        }
       }}
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />

@@ -24,6 +24,7 @@ export function LojaBottomSheet() {
       isMountedRef.current = true;
       bottomSheetref.current?.present();
     } else if (isMountedRef.current) {
+      isMountedRef.current = false;
       bottomSheetref.current?.dismiss();
       setNomeLoja('');
       setCategoria('');
@@ -68,8 +69,10 @@ export function LojaBottomSheet() {
       snapPoints={['55%']}
       enableDynamicSizing={false}
       onDismiss={() => {
-        isMountedRef.current = false;
-        fecharTabs();
+        if (isMountedRef.current) {
+          isMountedRef.current = false;
+          fecharTabs();
+        }
       }}
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
