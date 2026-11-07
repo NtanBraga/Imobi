@@ -1,14 +1,21 @@
-import { useUI, useWallet } from '@/hooks';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { db } from '@/database';
+import { AvatarRepository } from '@/database/repositories/AvatarRepo';
+import { useUI, useUser, useWallet } from '@/hooks';
+import { Avatar } from '@/models';
+import { BottomSheetBackdrop, BottomSheetFlashList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export function CarteiraBottomSheet() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const isMountedRef = useRef(false);
 
   const { tabAtiva, fecharTabs } = useUI();
-  const { saldo, creditar } = useWallet();
+  const { saldo, creditar, debitar } = useWallet();
+  const { usuarioAtivo, selecionarAvatar } = useUser();
+
+  //estado avatares
+  const [avatares, setAvatares] = useState<Avatar[]>([]);
 
   //Fazer um sistema de regaste diario
   const [resgatouhoje, setResgatouHoje] = useState(false);
@@ -17,11 +24,20 @@ export function CarteiraBottomSheet() {
     if (tabAtiva === 'CARTEIRA') {
       isMountedRef.current = true;
       bottomSheetRef.current?.present();
+
+      //carregar avatares
+      const fetchAvatares = async () => {
+        const database = await db;
+        const data = await AvatarRepository.buscarTodos(database);
+        setAvatares(data);
+      };
+      fetchAvatares();
     } else if (isMountedRef.current) {
       bottomSheetRef.current?.dismiss();
     }
   }, [tabAtiva]);
 
+  //resgate
   const resgateDiario = () => {
     if (!resgatouhoje) {
       creditar(500);
@@ -29,11 +45,74 @@ export function CarteiraBottomSheet() {
     }
   };
 
+  // logica para compra e equipamento
+  const handleComprar = (avatar: Avatar) => {
+    if (usuarioAtivo?.avatarId === avatar.id) return;
+
+    if (avatar.custoMoedas > 0) {
+      if (saldo < avatar.custoMoedas) {
+        Alert.alert(
+          'Saldo Insuficiente',
+          'Continue a reportar e recolher moedas para comprar esse avatar.',
+        );
+        return;
+      }
+
+      Alert.alert(
+        'Comprar Avatar',
+        `Deseja gastar ${avatar.custoMoedas} moedas em ${avatar.nome}`,
+        [
+          {
+            text: 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: 'Comprar',
+            onPress: async () => {
+              await debitar(avatar.custoMoedas);
+              await selecionarAvatar(avatar.id);
+            },
+          },
+        ],
+      );
+    } else {
+      //Se gratuito
+      selecionarAvatar(avatar.id);
+    }
+  };
+
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      <Text style={styles.subtitle}>SUA CARTEIRA</Text>
+      <Text style={styles.title}> {saldo.toLocaleString('pt-BR')} moedas</Text>
+      <Text style={styles.description}>
+        Acumule moedas para adquirir novos avatares e customizar seu perfil
+      </Text>
+
+      {/*RESGATE*/}
+      <TouchableOpacity style={styles.rewardCard} onPress={resgateDiario} disabled={resgatouhoje}>
+        <View style={styles.rewardInfo}>
+          <Text style={styles.rewardTitle}>Recompensa Diaria</Text>
+          <Text style={styles.rewardDesc}>
+            {resgatouhoje ? 'Volte amanhã para mais.' : 'Resgate agora suas moedas!'}
+          </Text>
+        </View>
+
+        {!resgatouhoje && (
+          <View style={styles.claimButton}>
+            <Text style={styles.claimText}>Resgatar</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+      <Text style={styles.sectionTitle}>Loja de Avatares</Text>
+    </View>
+  );
+
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
       index={0}
-      snapPoints={['70%']}
+      snapPoints={['75%']}
       enableDynamicSizing={false}
       onDismiss={() => {
         isMountedRef.current = false;
@@ -45,38 +124,43 @@ export function CarteiraBottomSheet() {
       handleIndicatorStyle={{ backgroundColor: 'white', width: 40 }}
       backgroundStyle={{ borderRadius: 24 }}
     >
-      <BottomSheetView style={styles.contentContainer}>
-        <Text style={styles.subtitle}>SUA CARTEIRA</Text>
-        <Text style={styles.title}> {saldo.toLocaleString('pt-BR')} moedas</Text>
-        <Text style={styles.description}>
-          Acumule moedas para adquirir novos avatares e customizar seu perfil
-        </Text>
+      <BottomSheetFlashList
+        data={avatares}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={renderHeader}
+        renderItem={({ item }) => {
+          const isEquipado = usuarioAtivo?.avatarId === item.id;
 
-        {/*RESGATE*/}
-        <TouchableOpacity style={styles.rewardCard} onPress={resgateDiario} disabled={resgatouhoje}>
-          <View style={styles.rewardInfo}>
-            <Text style={styles.rewardTitle}>Recompensa Diaria</Text>
-            <Text style={styles.rewardDesc}>
-              {resgatouhoje ? 'Volte amanhã para mais.' : 'Resgate agora suas moedas!'}
-            </Text>
-          </View>
+          return (
+            <TouchableOpacity
+              style={[styles.card, isEquipado && styles.cardEquipped]}
+              onPress={() => handleComprar(item)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.cardImage}>{item.imagem}</Text>
+              <Text style={styles.cardName}>{item.nome}</Text>
 
-          {!resgatouhoje && (
-            <View style={styles.claimButton}>
-              <Text style={styles.claimText}>Resgatar</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </BottomSheetView>
+              {isEquipado ? (
+                <View style={styles.badgeEquipped}>
+                  <Text style={styles.badgeText}>Equipado</Text>
+                </View>
+              ) : (
+                <Text style={styles.cardPrice}>
+                  {item.custoMoedas === 0 ? 'Grátis' : `🪙 ${item.custoMoedas}`}
+                </Text>
+              )}
+            </TouchableOpacity>
+          );
+        }}
+      />
     </BottomSheetModal>
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    padding: 24,
-  },
   subtitle: {
     fontSize: 12,
     color: '#2a9d8f',
@@ -100,6 +184,7 @@ const styles = StyleSheet.create({
     borderColor: 'orange',
     borderRadius: 16,
     backgroundColor: 'white',
+    marginBottom: 24,
   },
   rewardInfo: {
     flex: 1,
@@ -121,6 +206,64 @@ const styles = StyleSheet.create({
   },
   claimText: {
     color: 'white',
+    fontWeight: 'bold',
+  },
+  row: {
+    justifyContent: 'space-between',
+  },
+  listContent: {
+    padding: 24,
+    paddingBottom: 40,
+  },
+  headerContainer: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  card: {
+    backgroundColor: 'white',
+    width: '60%',
+    padding: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 15,
+    elevation: 2,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+  },
+  cardName: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 5,
+  },
+  cardImage: {
+    fontSize: 45,
+    marginBottom: 10,
+  },
+  cardEquipped: {
+    borderColor: '#4CAF50',
+    borderWidth: 2,
+  },
+  cardPrice: {
+    fontSize: 14,
+    color: '#d97706',
+    fontWeight: 'bold',
+  },
+  badgeEquipped: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });
