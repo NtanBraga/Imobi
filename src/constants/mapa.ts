@@ -1,8 +1,8 @@
 export const DISTANCIA_ALERTA_METROS = 200;
 
-export const ZOOM_TRANSITO = 17;
+export const ZOOM_TRANSITO = 19;
 
-export const ZOOM_A_PE = 18.5;
+export const ZOOM_A_PE = 18;
 
 export const MAPA_OFF_ESTILO = [
   {

@@ -62,12 +62,14 @@ export default function Map() {
     : null;
 
   //Atualizar camera quando localizacao falsa/real mudar e inclinação
+
+  const deltaZoom = modoLocomocao === ModoLocomocao.A_PE ? ZOOM_A_PE : ZOOM_TRANSITO;
+
+  const anguloInclinado = modoVisualizacao === ModoVisualizacao.ON ? 55 : 0;
+
   const atualizarCamera = () => {
     if (currentLocation && mapRef.current) {
       //Adaptado para capturar o modo gamificado (MODO ON)
-      const deltaZoom = modoLocomocao === ModoLocomocao.A_PE ? ZOOM_A_PE : ZOOM_TRANSITO;
-
-      const anguloInclinado = modoVisualizacao === ModoVisualizacao.ON ? 55 : 0;
 
       mapRef.current.animateCamera(
         {
@@ -76,6 +78,8 @@ export default function Map() {
             latitude: currentLocation.latitude,
           },
           pitch: anguloInclinado,
+          heading: 0,
+          altitude: 1000,
           zoom: deltaZoom,
         },
         { duration: 800 }, // animacao
@@ -358,16 +362,21 @@ export default function Map() {
         googleMapId={
           modoVisualizacao === ModoVisualizacao.ON ? '3873a55acf765a9ce661529d' : undefined
         }
-        initialRegion={
-          currentLocation
-            ? {
-                latitude: currentLocation.latitude,
-                longitude: currentLocation.longitude,
-                latitudeDelta: 0.002,
-                longitudeDelta: 0.002,
-              }
-            : initialRegion
-        }
+        initialCamera={{
+          center: currentLocation || {
+            latitude: initialRegion.latitude,
+            longitude: initialRegion.longitude,
+          },
+          pitch: anguloInclinado,
+          heading: 0,
+          altitude: 1000,
+          zoom: deltaZoom,
+        }}
+        onMapReady={() => {
+          setTimeout(() => {
+            atualizarCamera();
+          }, 250);
+        }}
         showsUserLocation={!isEnabledDevMode}
         showsCompass={false}
         showsMyLocationButton={false}
