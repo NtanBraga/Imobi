@@ -1,5 +1,5 @@
 import { calcularDistancia } from '@/components/distancia';
-import { MAPA_OFF_ESTILO } from '@/constants/mapa';
+import { MAPA_ON_ESTILO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
 import { LojaRepository, MoedaRepository, OcorrenciaRepository } from '@/database/repositories';
@@ -352,7 +352,7 @@ export default function Map() {
         showsCompass={false}
         showsMyLocationButton={false}
         //TODO: angulo da camera
-        customMapStyle={modoVisualizacao === ModoVisualizacao.OFF ? MAPA_OFF_ESTILO : []}
+        customMapStyle={modoVisualizacao === ModoVisualizacao.ON ? MAPA_ON_ESTILO : []}
       >
         {/*Marcador Dev*/}
         {isEnabledDevMode && currentLocation && (
