@@ -66,7 +66,7 @@ export function LojaBottomSheet() {
     <BottomSheetModal
       ref={bottomSheetref}
       index={0}
-      snapPoints={['55%']}
+      snapPoints={['70%']}
       enableDynamicSizing={false}
       onDismiss={() => {
         if (isMountedRef.current) {

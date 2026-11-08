@@ -120,7 +120,7 @@ export function CarteiraBottomSheet() {
     <BottomSheetModal
       ref={bottomSheetRef}
       index={0}
-      snapPoints={['75%']}
+      snapPoints={['85%']}
       enableDynamicSizing={false}
       onDismiss={() => {
         if (isMountedRef.current) {

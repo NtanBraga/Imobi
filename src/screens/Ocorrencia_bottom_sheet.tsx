@@ -62,7 +62,7 @@ export function OcorrenciaBottomSheet() {
     <BottomSheetModal
       ref={bottomSheetRef}
       index={0}
-      snapPoints={['65%']}
+      snapPoints={['70%']}
       enableDynamicSizing={false}
       onDismiss={() => {
         if (isMountedRef.current) {
