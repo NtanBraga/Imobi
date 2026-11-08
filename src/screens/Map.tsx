@@ -1,5 +1,5 @@
 import { calcularDistancia } from '@/components/distancia';
-import { MAPA_ON_ESTILO } from '@/constants/mapa';
+import { ZOOM_A_PE, ZOOM_TRANSITO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
 import { LojaRepository, MoedaRepository, OcorrenciaRepository } from '@/database/repositories';
@@ -62,10 +62,10 @@ export default function Map() {
     : null;
 
   //Atualizar camera quando localizacao falsa/real mudar e inclinação
-  useEffect(() => {
+  const atualizarCamera = () => {
     if (currentLocation && mapRef.current) {
       //Adaptado para capturar o modo gamificado (MODO ON)
-      const deltaZoom = modoLocomocao === ModoLocomocao.A_PE ? 18.5 : 17.2;
+      const deltaZoom = modoLocomocao === ModoLocomocao.A_PE ? ZOOM_A_PE : ZOOM_TRANSITO;
 
       const anguloInclinado = modoVisualizacao === ModoVisualizacao.ON ? 55 : 0;
 
@@ -81,6 +81,10 @@ export default function Map() {
         { duration: 800 }, // animacao
       );
     }
+  };
+
+  useEffect(() => {
+    atualizarCamera();
   }, [currentLocation?.latitude, currentLocation?.longitude, modoLocomocao, modoVisualizacao]);
 
   //Mock inicial ate o mapa carregar o gps
@@ -347,16 +351,28 @@ export default function Map() {
   return (
     <View style={styles.container}>
       <MapView
+        key={modoVisualizacao}
         style={StyleSheet.absoluteFill}
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
-        initialRegion={initialRegion}
+        googleMapId={
+          modoVisualizacao === ModoVisualizacao.ON ? '3873a55acf765a9ce661529d' : undefined
+        }
+        initialRegion={
+          currentLocation
+            ? {
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                latitudeDelta: 0.002,
+                longitudeDelta: 0.002,
+              }
+            : initialRegion
+        }
         showsUserLocation={!isEnabledDevMode}
         showsCompass={false}
         showsMyLocationButton={false}
         pitchEnabled={true}
-        showsBuildings={true}
-        customMapStyle={modoVisualizacao === ModoVisualizacao.ON ? MAPA_ON_ESTILO : []}
+        showsBuildings={modoVisualizacao === ModoVisualizacao.OFF}
       >
         {/*Marcador Dev*/}
         {isEnabledDevMode && currentLocation && (
@@ -688,11 +704,11 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '$64748b',
+    color: '#64748b',
     fontWeight: '500',
   },
   navTextActive: {
-    color: '0d9488',
+    color: '#0d9488',
     fontWeight: '700',
   },
   plusButtonWrapper: {
