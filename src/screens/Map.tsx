@@ -61,24 +61,27 @@ export default function Map() {
       }
     : null;
 
-  //Atualizar camera quando localizacao falsa/real mudar
+  //Atualizar camera quando localizacao falsa/real mudar e inclinação
   useEffect(() => {
     if (currentLocation && mapRef.current) {
-      // Delta maior = Zoom menor; Delta menor = Zoom maior
-      //Zoom menor para Carro, Zoom maior para A pé
-      const deltaZoom = modoLocomocao == ModoLocomocao.TRANSITO ? 0.0015 : 0.003;
+      //Adaptado para capturar o modo gamificado (MODO ON)
+      const deltaZoom = modoLocomocao === ModoLocomocao.A_PE ? 18.5 : 17.2;
 
-      mapRef.current.animateToRegion(
+      const anguloInclinado = modoVisualizacao === ModoVisualizacao.ON ? 55 : 0;
+
+      mapRef.current.animateCamera(
         {
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          latitudeDelta: deltaZoom,
-          longitudeDelta: deltaZoom,
+          center: {
+            longitude: currentLocation.longitude,
+            latitude: currentLocation.latitude,
+          },
+          pitch: anguloInclinado,
+          zoom: deltaZoom,
         },
-        1000,
-      ); // 1000ms para animar
+        { duration: 800 }, // animacao
+      );
     }
-  }, [currentLocation?.latitude, currentLocation?.longitude, modoLocomocao]);
+  }, [currentLocation?.latitude, currentLocation?.longitude, modoLocomocao, modoVisualizacao]);
 
   //Mock inicial ate o mapa carregar o gps
   const initialRegion = {
@@ -351,7 +354,8 @@ export default function Map() {
         showsUserLocation={!isEnabledDevMode}
         showsCompass={false}
         showsMyLocationButton={false}
-        //TODO: angulo da camera
+        pitchEnabled={true}
+        showsBuildings={true}
         customMapStyle={modoVisualizacao === ModoVisualizacao.ON ? MAPA_ON_ESTILO : []}
       >
         {/*Marcador Dev*/}
