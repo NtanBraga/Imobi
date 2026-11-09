@@ -27,6 +27,8 @@ export default function Map() {
     setModoVisualizacao,
     coordenadaFoco,
     setCoordenadaFoco,
+    tema,
+    setTema,
   } = useMap();
   const { location } = useLocation();
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
@@ -355,7 +357,7 @@ export default function Map() {
   return (
     <View style={styles.container}>
       <MapView
-        key={modoVisualizacao}
+        key={`${modoVisualizacao}-${tema}`}
         style={StyleSheet.absoluteFill}
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
@@ -364,6 +366,7 @@ export default function Map() {
             ? '3873a55acf765a9ce661529d'
             : '3873a55acf765a9cacb64e78'
         }
+        userInterfaceStyle={tema === 'DIA' ? 'light' : 'dark'}
         initialCamera={{
           center: currentLocation || {
             latitude: initialRegion.latitude,
