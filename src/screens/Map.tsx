@@ -18,7 +18,7 @@ import {
 } from '@/models';
 import { Lucide } from '@react-native-vector-icons/lucide';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function Map() {
@@ -70,7 +70,7 @@ export default function Map() {
             longitude: location.longitude + devOffset.lng,
           }
         : null,
-    [location?.latitude, location?.longitude, devOffset.lat, devOffset.lng],
+    [location, devOffset.lat, devOffset.lng],
   );
 
   //Atualizar camera quando localizacao falsa/real mudar e inclinação
@@ -101,7 +101,7 @@ export default function Map() {
 
   useEffect(() => {
     atualizarCamera();
-  }, [currentLocation?.latitude, currentLocation?.longitude, modoLocomocao, modoVisualizacao]);
+  }, [atualizarCamera]);
 
   //Mock inicial ate o mapa carregar o gps
   const initialRegion = {
@@ -120,30 +120,30 @@ export default function Map() {
   const ultimoDestinoRef = useRef<string | null>(null);
   const rotaEmBuscaRef = useRef<string | null>(null);
   const requisicaoRotaRef = useRef(0);
+  const origemCalculadaRef = useRef<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     if (!destino || !currentLocation) {
       ultimoDestinoRef.current = null;
       rotaEmBuscaRef.current = null;
+      origemCalculadaRef.current = null;
       requisicaoRotaRef.current += 1;
+
       return;
     }
 
     const chaveDestino = `${destino.latitude}:${destino.longitude}`;
-
     const chaveModo = modoLocomocao === ModoLocomocao.A_PE ? 'A_PE' : 'TRANSITO';
-
     const chaveRequisicao = `${chaveDestino}:${chaveModo}`;
-
     const mudouDestino = ultimoDestinoRef.current !== chaveDestino;
 
     if (!mudouDestino && rotasPorModo[chaveModo].length > 0) return;
-
     if (rotaEmBuscaRef.current === chaveRequisicao) return;
 
     rotaEmBuscaRef.current = chaveRequisicao;
-
     const idRequisicao = ++requisicaoRotaRef.current;
+
+    //requisicao da rota
 
     const buscar = async () => {
       const modoApi = modoLocomocao === ModoLocomocao.A_PE ? 'WALK' : 'DRIVE';
@@ -153,6 +153,7 @@ export default function Map() {
 
       if (pontos.length > 0) {
         ultimoDestinoRef.current = chaveDestino;
+        origemCalculadaRef.current = currentLocation;
 
         setRotasPorModo((prev) => ({
           ...(mudouDestino ? { TRANSITO: [], A_PE: [] } : prev),
@@ -168,10 +169,85 @@ export default function Map() {
     buscar();
   }, [destino, currentLocation, rotasPorModo, modoLocomocao]);
 
-  const rotaAtiva =
-    destino && currentLocation
-      ? rotasPorModo[modoLocomocao === ModoLocomocao.A_PE ? 'A_PE' : 'TRANSITO']
-      : [];
+  const rotaAtiva = useMemo(
+    () =>
+      destino && currentLocation
+        ? rotasPorModo[modoLocomocao === ModoLocomocao.A_PE ? 'A_PE' : 'TRANSITO']
+        : [],
+    [destino, currentLocation, rotasPorModo, modoLocomocao],
+  );
+
+  //rota dinamica
+  const statusNavegacao = useMemo(() => {
+    if (!currentLocation || rotaAtiva.length === 0)
+      return { rotaRenderizada: [], menorDistancia: 0 };
+
+    if (rotaAtiva.length === 1) {
+      const dist = calcularDistancia(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        rotaAtiva[0].latitude,
+        rotaAtiva[0].longitude,
+      );
+      return {
+        rotaRenderizada:
+          modoLocomocao === ModoLocomocao.TRANSITO ? rotaAtiva : [currentLocation, rotaAtiva[0]],
+        menorDistancia: dist,
+      };
+    }
+
+    let melhorSegmento = 0;
+    let menorDistancia = Infinity;
+    let pontoNaRua = rotaAtiva[0];
+
+    //Projetar posicao do usuario em segmento A, B
+    for (let i = 0; i < rotaAtiva.length - 1; i++) {
+      const A = rotaAtiva[i];
+      const B = rotaAtiva[i + 1];
+
+      const dx = B.longitude - A.longitude;
+      const dy = B.latitude - A.latitude;
+      const lenSq = dx * dx + dy * dy;
+
+      let t = 0;
+
+      if (lenSq > 0) {
+        t =
+          ((currentLocation.longitude - A.longitude) * dx +
+            (currentLocation.latitude - A.latitude) * dy) /
+          lenSq;
+        t = Math.max(0, Math.min(1, t));
+      }
+      const proj = {
+        latitude: A.latitude + t * dy,
+        longitude: A.longitude + t * dx,
+      };
+
+      const dist = calcularDistancia(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        proj.latitude,
+        proj.longitude,
+      );
+      if (dist < menorDistancia) {
+        menorDistancia = dist;
+        melhorSegmento = i;
+        pontoNaRua = proj;
+      }
+    }
+
+    const pontosRestantes = rotaAtiva.slice(melhorSegmento + 1);
+
+    //Modo Transito, a linha se projeta na rua
+    const _rotaRenderizada =
+      modoLocomocao === ModoLocomocao.TRANSITO
+        ? [pontoNaRua, ...pontosRestantes]
+        : [currentLocation, pontoNaRua, ...pontosRestantes];
+
+    return { _rotaRenderizada, menorDistancia };
+  }, [currentLocation, rotaAtiva, modoLocomocao]);
+
+  const rotaRenderizada = statusNavegacao._rotaRenderizada || [];
 
   //Buscar dados no SQLite quando nenhuma tab ativa (para marcadores)
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
@@ -183,6 +259,47 @@ export default function Map() {
 
   //Identificar avatar equipado no momento
   const avatarEquipado = avatares.find((av) => av.id === usuarioAtivo?.avatarId);
+
+  //Cancelar rota
+  useEffect(() => {
+    if (!destino || !currentLocation) return;
+
+    const distDestino = calcularDistancia(
+      currentLocation.latitude,
+      currentLocation.longitude,
+      destino.latitude,
+      destino.longitude,
+    );
+
+    //Se chegou, tolerancia de 5 metros
+    if (distDestino <= 5) {
+      stopMoving();
+      ultimoDestinoRef.current = null;
+      rotaEmBuscaRef.current = null;
+      origemCalculadaRef.current = null;
+      requisicaoRotaRef.current += 1;
+      setDestino(null);
+
+      Alert.alert('Chegou!', 'Você chegou ao seu destino');
+      return;
+    }
+
+    //Se desviou mais de 10 metros, e se moveu mais 5 metros do ponto inicial
+    if (rotaAtiva.length > 0 && statusNavegacao.menorDistancia > 15 && origemCalculadaRef.current) {
+      const distDaOrigem = calcularDistancia(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        origemCalculadaRef.current.latitude,
+        origemCalculadaRef.current.longitude,
+      );
+
+      if (distDaOrigem > 5 && ultimoDestinoRef.current) {
+        ultimoDestinoRef.current = null;
+        rotaEmBuscaRef.current = null;
+        requisicaoRotaRef.current += 1;
+      }
+    }
+  }, [currentLocation, destino, rotaAtiva.length, statusNavegacao.menorDistancia, setDestino]);
 
   //Validação comunitaria
   const [ocorrenciaProxima, setOcorrenciaProxima] = useState<Ocorrencia | null>(null);
@@ -256,9 +373,9 @@ export default function Map() {
       };
       carregarMarcadores();
     }
-  }, [tabAtiva, currentLocation?.latitude, currentLocation?.longitude]);
+  }, [tabAtiva, currentLocation]);
 
-  //Sistema de gamificação (Logica de moedas)
+  //Sistema de gamificação (Logica de moedas e ocorrencias)
   useEffect(() => {
     if (!currentLocation) return;
 
@@ -373,15 +490,7 @@ export default function Map() {
       }
     };
     verificarColetas();
-  }, [
-    currentLocation?.latitude,
-    currentLocation?.longitude,
-    moedas,
-    ocorrencias,
-    modoVisualizacao,
-    ocorrenciaProxima?.id,
-    creditar,
-  ]);
+  }, [currentLocation, moedas, ocorrencias, modoVisualizacao, ocorrenciaProxima?.id, creditar]);
 
   //Cores dos marcadores baseado por ocorrencia
   const getCorOcorrencia = (tipo: TipoOcorrencia) => {
@@ -470,9 +579,9 @@ export default function Map() {
         showsBuildings={modoVisualizacao === ModoVisualizacao.OFF}
       >
         {/*Renderizar Rotas*/}
-        {rotaAtiva.length > 0 && (
+        {rotaRenderizada.length > 0 && (
           <Polyline
-            coordinates={rotaAtiva}
+            coordinates={rotaRenderizada}
             strokeWidth={5}
             strokeColor={isDark ? '#60a5fa' : '#3b82f6'}
           />
