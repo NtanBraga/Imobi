@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type TabAtiva = 'NENHUM' | 'OCORRENCIA' | 'CARTEIRA' | 'PERFIL' | 'LOJA';
+type TabAtiva = 'NENHUM' | 'OCORRENCIA' | 'CARTEIRA' | 'PERFIL' | 'LOJA' | 'ROTA';
 
 interface UIState {
   tabAtiva: TabAtiva;

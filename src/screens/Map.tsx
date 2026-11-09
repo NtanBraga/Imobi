@@ -1,4 +1,5 @@
 import { calcularDistancia } from '@/components/distancia';
+import { calcularRotaApi } from '@/components/path';
 import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
 import { ZOOM_A_PE, ZOOM_TRANSITO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
@@ -16,9 +17,9 @@ import {
   TipoOcorrencia,
 } from '@/models';
 import { Lucide } from '@react-native-vector-icons/lucide';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 export default function Map() {
   const {
@@ -26,10 +27,11 @@ export default function Map() {
     setModoLocomocao,
     modoVisualizacao,
     setModoVisualizacao,
-    coordenadaFoco,
     setCoordenadaFoco,
     tema,
     setTema,
+    destino,
+    setDestino,
   } = useMap();
   const { location } = useLocation();
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
@@ -60,12 +62,16 @@ export default function Map() {
   };
 
   //Posicao final (combinar gps real com deslocamento dev)
-  const currentLocation = location
-    ? {
-        latitude: location.latitude + devOffset.lat,
-        longitude: location.longitude + devOffset.lng,
-      }
-    : null;
+  const currentLocation = useMemo(
+    () =>
+      location
+        ? {
+            latitude: location.latitude + devOffset.lat,
+            longitude: location.longitude + devOffset.lng,
+          }
+        : null,
+    [location?.latitude, location?.longitude, devOffset.lat, devOffset.lng],
+  );
 
   //Atualizar camera quando localizacao falsa/real mudar e inclinação
 
@@ -73,7 +79,7 @@ export default function Map() {
 
   const anguloInclinado = modoVisualizacao === ModoVisualizacao.ON ? 55 : 0;
 
-  const atualizarCamera = () => {
+  const atualizarCamera = useCallback(() => {
     if (currentLocation && mapRef.current) {
       //Adaptado para capturar o modo gamificado (MODO ON)
 
@@ -91,7 +97,7 @@ export default function Map() {
         { duration: 800 }, // animacao
       );
     }
-  };
+  }, [currentLocation, anguloInclinado, deltaZoom]);
 
   useEffect(() => {
     atualizarCamera();
@@ -104,6 +110,68 @@ export default function Map() {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   };
+
+  //ROTA
+  const [rotasPorModo, setRotasPorModo] = useState<{
+    TRANSITO: { latitude: number; longitude: number }[];
+    A_PE: { latitude: number; longitude: number }[];
+  }>({ TRANSITO: [], A_PE: [] });
+
+  const ultimoDestinoRef = useRef<string | null>(null);
+  const rotaEmBuscaRef = useRef<string | null>(null);
+  const requisicaoRotaRef = useRef(0);
+
+  useEffect(() => {
+    if (!destino || !currentLocation) {
+      ultimoDestinoRef.current = null;
+      rotaEmBuscaRef.current = null;
+      requisicaoRotaRef.current += 1;
+      return;
+    }
+
+    const chaveDestino = `${destino.latitude}:${destino.longitude}`;
+
+    const chaveModo = modoLocomocao === ModoLocomocao.A_PE ? 'A_PE' : 'TRANSITO';
+
+    const chaveRequisicao = `${chaveDestino}:${chaveModo}`;
+
+    const mudouDestino = ultimoDestinoRef.current !== chaveDestino;
+
+    if (!mudouDestino && rotasPorModo[chaveModo].length > 0) return;
+
+    if (rotaEmBuscaRef.current === chaveRequisicao) return;
+
+    rotaEmBuscaRef.current = chaveRequisicao;
+
+    const idRequisicao = ++requisicaoRotaRef.current;
+
+    const buscar = async () => {
+      const modoApi = modoLocomocao === ModoLocomocao.A_PE ? 'WALK' : 'DRIVE';
+      const pontos = await calcularRotaApi(currentLocation, destino, modoApi);
+
+      if (idRequisicao !== requisicaoRotaRef.current) return;
+
+      if (pontos.length > 0) {
+        ultimoDestinoRef.current = chaveDestino;
+
+        setRotasPorModo((prev) => ({
+          ...(mudouDestino ? { TRANSITO: [], A_PE: [] } : prev),
+          [chaveModo]: pontos,
+        }));
+
+        mapRef.current?.fitToCoordinates(pontos, {
+          edgePadding: { top: 80, right: 40, bottom: 200, left: 40 },
+          animated: true,
+        });
+      }
+    };
+    buscar();
+  }, [destino, currentLocation, rotasPorModo, modoLocomocao]);
+
+  const rotaAtiva =
+    destino && currentLocation
+      ? rotasPorModo[modoLocomocao === ModoLocomocao.A_PE ? 'A_PE' : 'TRANSITO']
+      : [];
 
   //Buscar dados no SQLite quando nenhuma tab ativa (para marcadores)
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
@@ -132,7 +200,7 @@ export default function Map() {
         [idValidacao, ocorrenciaProxima.id, 'user-mvp', resposta, new Date().toISOString()],
       );
 
-      if (resposta == 'NAO') {
+      if (resposta === 'NAO') {
         await OcorrenciaRepository.atualizarStatus(
           database,
           ocorrenciaProxima.id,
@@ -188,7 +256,7 @@ export default function Map() {
       };
       carregarMarcadores();
     }
-  }, [tabAtiva, location]);
+  }, [tabAtiva, currentLocation?.latitude, currentLocation?.longitude]);
 
   //Sistema de gamificação (Logica de moedas)
   useEffect(() => {
@@ -311,6 +379,8 @@ export default function Map() {
     moedas,
     ocorrencias,
     modoVisualizacao,
+    ocorrenciaProxima?.id,
+    creditar,
   ]);
 
   //Cores dos marcadores baseado por ocorrencia
@@ -386,12 +456,31 @@ export default function Map() {
             atualizarCamera();
           }, 250);
         }}
+        onLongPress={(e) => {
+          setRotasPorModo({ TRANSITO: [], A_PE: [] });
+          ultimoDestinoRef.current = null;
+          rotaEmBuscaRef.current = null;
+          requisicaoRotaRef.current += 1;
+          setDestino(e.nativeEvent.coordinate);
+        }}
         showsUserLocation={!isEnabledDevMode}
         showsCompass={false}
         showsMyLocationButton={false}
         pitchEnabled={true}
         showsBuildings={modoVisualizacao === ModoVisualizacao.OFF}
       >
+        {/*Renderizar Rotas*/}
+        {rotaAtiva.length > 0 && (
+          <Polyline
+            coordinates={rotaAtiva}
+            strokeWidth={5}
+            strokeColor={isDark ? '#60a5fa' : '#3b82f6'}
+          />
+        )}
+
+        {/*Marcador Rota*/}
+        {destino && <Marker coordinate={destino} title="Destino final" pinColor="red" />}
+
         {/*Marcador Dev*/}
         {isEnabledDevMode && currentLocation && (
           <Marker

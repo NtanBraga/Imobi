@@ -60,7 +60,7 @@ export const calcularRotaApi = async (
         },
         destination: {
           location: {
-            latLng: { latitude: destino.latitude, longitude: origem.longitude },
+            latLng: { latitude: destino.latitude, longitude: destino.longitude },
           },
         },
         travelMode: modo,
