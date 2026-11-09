@@ -131,7 +131,7 @@ export function CarteiraBottomSheet() {
     <BottomSheetModal
       ref={bottomSheetRef}
       index={0}
-      snapPoints={['85%']}
+      snapPoints={['83%']}
       enableDynamicSizing={false}
       onDismiss={() => {
         if (isMountedRef.current) {
@@ -148,7 +148,7 @@ export function CarteiraBottomSheet() {
       }}
       backgroundStyle={{
         borderRadius: 24,
-        backgroundColor: isDark ? '#1e293b' : TEMA_BORDAS_COR_CLARO,
+        backgroundColor: isDark ? '#1e293b' : 'white',
       }}
     >
       <BottomSheetFlatList

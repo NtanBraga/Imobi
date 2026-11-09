@@ -86,7 +86,7 @@ export function LojaBottomSheet() {
       }}
       backgroundStyle={{
         borderRadius: 24,
-        backgroundColor: isDark ? '#1e293b' : TEMA_BORDAS_COR_CLARO,
+        backgroundColor: isDark ? '#1e293b' : 'white',
       }}
     >
       <BottomSheetView style={[styles.contentContainer, isDark && styles.contentContainerDark]}>
