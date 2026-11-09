@@ -1,6 +1,7 @@
+import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
 import { db } from '@/database';
 import { AvatarRepository } from '@/database/repositories/AvatarRepo';
-import { useUI, useUser, useWallet } from '@/hooks';
+import { useMap, useUI, useUser, useWallet } from '@/hooks';
 import { Avatar } from '@/models';
 import { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
@@ -13,6 +14,9 @@ export function CarteiraBottomSheet() {
   const { tabAtiva, fecharTabs } = useUI();
   const { saldo, creditar, debitar } = useWallet();
   const { usuarioAtivo, selecionarAvatar, inventarioAvatares, comprarAvatar } = useUser();
+  const { tema } = useMap();
+
+  const isDark = tema === 'NOITE';
 
   //estado avatares
   const [avatares, setAvatares] = useState<Avatar[]>([]);
@@ -92,16 +96,23 @@ export function CarteiraBottomSheet() {
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       <Text style={styles.subtitle}>SUA CARTEIRA</Text>
-      <Text style={styles.title}> {saldo.toLocaleString('pt-BR')} moedas</Text>
-      <Text style={styles.description}>
+      <Text style={[styles.title, isDark && styles.textDark]}>
+        {' '}
+        {saldo.toLocaleString('pt-BR')} moedas
+      </Text>
+      <Text style={[styles.description, isDark && styles.textSubDark]}>
         Acumule moedas para adquirir novos avatares e customizar seu perfil
       </Text>
 
       {/*RESGATE*/}
-      <TouchableOpacity style={styles.rewardCard} onPress={resgateDiario} disabled={resgatouhoje}>
+      <TouchableOpacity
+        style={[styles.rewardCard, isDark && styles.rewardCardDark]}
+        onPress={resgateDiario}
+        disabled={resgatouhoje}
+      >
         <View style={styles.rewardInfo}>
-          <Text style={styles.rewardTitle}>Recompensa Diaria</Text>
-          <Text style={styles.rewardDesc}>
+          <Text style={[styles.rewardTitle, isDark && styles.textDark]}>Recompensa Diaria</Text>
+          <Text style={[styles.rewardDesc, isDark && styles.textSubDark]}>
             {resgatouhoje ? 'Volte amanhã para mais.' : 'Resgate agora suas moedas!'}
           </Text>
         </View>
@@ -112,7 +123,7 @@ export function CarteiraBottomSheet() {
           </View>
         )}
       </TouchableOpacity>
-      <Text style={styles.sectionTitle}>Loja de Avatares</Text>
+      <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Loja de Avatares</Text>
     </View>
   );
 
@@ -131,8 +142,14 @@ export function CarteiraBottomSheet() {
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
       )}
-      handleIndicatorStyle={{ backgroundColor: 'black', width: 40 }}
-      backgroundStyle={{ borderRadius: 24 }}
+      handleIndicatorStyle={{
+        backgroundColor: isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO,
+        width: 40,
+      }}
+      backgroundStyle={{
+        borderRadius: 24,
+        backgroundColor: isDark ? '#1e293b' : TEMA_BORDAS_COR_CLARO,
+      }}
     >
       <BottomSheetFlatList
         data={avatares}
@@ -146,19 +163,25 @@ export function CarteiraBottomSheet() {
 
           return (
             <TouchableOpacity
-              style={[styles.card, isEquipado && styles.cardEquipped]}
+              style={[
+                styles.card,
+                isDark && styles.cardDark,
+                isEquipado && (isDark ? styles.cardEquippedDark : styles.cardEquipped),
+              ]}
               onPress={() => handleComprar(item)}
               activeOpacity={0.7}
             >
               <Text style={styles.cardImage}>{item.imagem}</Text>
-              <Text style={styles.cardName}>{item.nome}</Text>
+              <Text style={[styles.cardName, isDark && styles.textDark]}>{item.nome}</Text>
 
               {isEquipado ? (
-                <View style={styles.badgeEquipped}>
+                <View style={[styles.badgeEquipped, isDark && styles.badgeEquippedDark]}>
                   <Text style={styles.badgeText}>Equipado</Text>
                 </View>
               ) : inventarioAvatares.includes(item.id) ? (
-                <View style={[styles.badgeEquipped, { backgroundColor: 'gray' }]}>
+                <View
+                  style={[styles.badgeEquipped, { backgroundColor: isDark ? '#475569' : 'gray' }]}
+                >
                   <Text style={styles.badgeText}>Usar</Text>
                 </View>
               ) : (
@@ -279,5 +302,25 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  textDark: {
+    color: '#f1f5f9',
+  },
+  textSubDark: {
+    color: TEMA_BORDAS_COR_ESCURO,
+  },
+  rewardCardDark: {
+    backgroundColor: '#334155',
+    borderColor: '#b45309',
+  },
+  cardDark: {
+    backgroundColor: '#334155',
+  },
+  cardEquippedDark: {
+    borderColor: '#22c55e',
+    borderWidth: 2,
+  },
+  badgeEquippedDark: {
+    backgroundColor: '#166534',
   },
 });
