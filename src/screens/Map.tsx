@@ -360,7 +360,9 @@ export default function Map() {
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         googleMapId={
-          modoVisualizacao === ModoVisualizacao.ON ? '3873a55acf765a9ce661529d' : undefined
+          modoVisualizacao === ModoVisualizacao.ON
+            ? '3873a55acf765a9ce661529d'
+            : '3873a55acf765a9cacb64e78'
         }
         initialCamera={{
           center: currentLocation || {
