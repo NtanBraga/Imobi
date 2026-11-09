@@ -1,3 +1,4 @@
+import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
 import { db } from '@/database';
 import { LojaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI, useWallet } from '@/hooks';
@@ -17,7 +18,9 @@ export function LojaBottomSheet() {
   const { location } = useLocation();
   const { creditar } = useWallet();
 
-  const { coordenadaFoco } = useMap();
+  const { coordenadaFoco, tema } = useMap();
+
+  const isDark = tema === 'NOITE';
 
   useEffect(() => {
     if (tabAtiva === 'LOJA') {
@@ -77,35 +80,53 @@ export function LojaBottomSheet() {
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
       )}
-      handleIndicatorStyle={{ backgroundColor: 'black', width: 40 }}
-      backgroundStyle={{ borderRadius: 24 }}
+      handleIndicatorStyle={{
+        backgroundColor: isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO,
+        width: 40,
+      }}
+      backgroundStyle={{
+        borderRadius: 24,
+        backgroundColor: isDark ? '#1e293b' : TEMA_BORDAS_COR_CLARO,
+      }}
     >
-      <BottomSheetView style={styles.contentContainer}>
-        <Text style={styles.title}>Registrar comércio</Text>
-        <Text style={styles.description}>
+      <BottomSheetView style={[styles.contentContainer, isDark && styles.contentContainerDark]}>
+        <Text style={[styles.title, isDark && styles.textDark]}>Registrar comércio</Text>
+        <Text style={[styles.description, isDark && styles.textSubDark]}>
           Adicione um estabelecimento util ao mapa da comunidade.
         </Text>
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, isDark && styles.inputDark]}
           placeholder="Nome do estabelecimento"
-          placeholderTextColor={'gray'}
+          placeholderTextColor={isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO}
           value={nomeLoja}
           onChangeText={setNomeLoja}
           maxLength={40}
         />
 
-        <Text style={styles.label}>Categoria:</Text>
+        <Text style={[styles.label, isDark && styles.textDark]}>Categoria:</Text>
 
         {/*LISTA CATEGORIAS*/}
         <View style={styles.categoryContainer}>
           {categorias.map((cat) => (
             <TouchableOpacity
               key={cat}
-              style={[styles.categoryBadge, categoria === cat && styles.categoryBadgeSelected]}
+              style={[
+                styles.categoryBadge,
+                isDark && styles.categoryBadgeDark,
+                categoria === cat &&
+                  (isDark ? styles.categoryBadgeSelectedDark : styles.categoryBadgeSelected),
+              ]}
               onPress={() => setCategoria(cat)}
             >
-              <Text style={[styles.categoryText, categoria === cat && styles.categoryTextSelected]}>
+              <Text
+                style={[
+                  styles.categoryText,
+                  isDark && styles.categoryTextDark,
+                  categoria === cat &&
+                    (isDark ? styles.categoryTextSelectedDark : styles.categoryTextSelected),
+                ]}
+              >
                 {cat}
               </Text>
             </TouchableOpacity>
@@ -196,5 +217,33 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  contentContainerDark: {
+    backgroundColor: '#1e293b',
+  },
+  textDark: {
+    color: '#f1f5f9',
+  },
+  textSubDark: {
+    color: TEMA_BORDAS_COR_ESCURO,
+  },
+  inputDark: {
+    backgroundColor: '#0f172a',
+    borderColor: '#334155',
+    color: '#f8fafc',
+  },
+  categoryBadgeDark: {
+    backgroundColor: '#334155',
+    borderColor: '#475569',
+  },
+  categoryBadgeSelectedDark: {
+    borderColor: '#2dd4bf',
+    backgroundColor: 'rgba(45, 212, 191, 0.15)',
+  },
+  categoryTextDark: {
+    color: TEMA_BORDAS_COR_ESCURO,
+  },
+  categoryTextSelectedDark: {
+    color: '#2dd4bf',
   },
 });
