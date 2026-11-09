@@ -1,3 +1,4 @@
+import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
 import { db } from '@/database';
 import { OcorrenciaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI, useWallet } from '@/hooks';
@@ -13,7 +14,10 @@ export function OcorrenciaBottomSheet() {
   const [tipoSelecionado, setTipoSelecionado] = useState<TipoOcorrencia | null>(null);
   const { location } = useLocation();
   const { creditar } = useWallet();
-  const { coordenadaFoco } = useMap();
+  const { coordenadaFoco, tema } = useMap();
+
+  //Tema
+  const isDark = tema === 'NOITE';
 
   //controlar abertura/fechamento
   useEffect(() => {
@@ -73,15 +77,18 @@ export function OcorrenciaBottomSheet() {
       backdropComponent={(props) => (
         <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
       )}
-      handleIndicatorStyle={{ backgroundColor: 'black', width: 40 }}
-      backgroundStyle={{ borderRadius: 24 }}
+      handleIndicatorStyle={{
+        backgroundColor: isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO,
+        width: 40,
+      }}
+      backgroundStyle={{ borderRadius: 24, backgroundColor: isDark ? '#1e293b' : 'white' }}
     >
-      <BottomSheetView style={styles.contentContainer}>
-        <Text style={styles.title}>Selecione um risco.</Text>
+      <BottomSheetView style={[styles.contentContainer, isDark && styles.contentContainerDark]}>
+        <Text style={[styles.title, isDark && styles.textDark]}>Selecione um risco.</Text>
 
         {/*Opcao: BURACO*/}
         <TouchableOpacity
-          style={styles.optionRow}
+          style={[styles.optionRow, isDark && styles.optionRowDark]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.BURACO)}
         >
           <View style={[styles.iconBox, { backgroundColor: 'blue' }]}>
@@ -89,10 +96,9 @@ export function OcorrenciaBottomSheet() {
           </View>
 
           <View>
-            <Text>Buraco</Text>
-            <Text>neste local</Text>
+            <Text style={[isDark && styles.textDark]}>Buraco</Text>
+            <Text style={[isDark && styles.textSubDark]}>neste local</Text>
           </View>
-          <View></View>
         </TouchableOpacity>
 
         {/*Opcao: ARVORE CAIDA*/}
@@ -105,10 +111,9 @@ export function OcorrenciaBottomSheet() {
           </View>
 
           <View>
-            <Text>Arvore caida</Text>
-            <Text>neste local</Text>
+            <Text style={[isDark && styles.textDark]}>Arvore caida</Text>
+            <Text style={[isDark && styles.textSubDark]}>neste local</Text>
           </View>
-          <View></View>
         </TouchableOpacity>
 
         {/*Opcao: RADAR*/}
@@ -121,10 +126,9 @@ export function OcorrenciaBottomSheet() {
           </View>
 
           <View>
-            <Text>Radar</Text>
-            <Text>neste local</Text>
+            <Text style={[isDark && styles.textDark]}>Radar</Text>
+            <Text style={[isDark && styles.textSubDark]}>neste local</Text>
           </View>
-          <View></View>
         </TouchableOpacity>
 
         {/*Opcao: PEDESTRE MACHUCADO*/}
@@ -137,10 +141,9 @@ export function OcorrenciaBottomSheet() {
           </View>
 
           <View>
-            <Text>Pedestre machucado</Text>
-            <Text>neste local</Text>
+            <Text style={[isDark && styles.textDark]}>Pedestre machucado</Text>
+            <Text style={[isDark && styles.textSubDark]}>neste local</Text>
           </View>
-          <View></View>
         </TouchableOpacity>
 
         {/*Opcao: ZONA DE PERIGO TODO: SERIA MELHOR CRIAR UMA ZONA MESMO CIRCULO*/}
@@ -153,10 +156,9 @@ export function OcorrenciaBottomSheet() {
           </View>
 
           <View>
-            <Text>Zona de perigo</Text>
-            <Text>neste local</Text>
+            <Text style={[isDark && styles.textDark]}>Zona de perigo</Text>
+            <Text style={[isDark && styles.textSubDark]}>neste local</Text>
           </View>
-          <View></View>
         </TouchableOpacity>
 
         {/*CONFIRMAR*/}
@@ -209,5 +211,18 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  contentContainerDark: {
+    backgroundColor: '#1e293b',
+  },
+  textDark: {
+    color: '#f1f5f9',
+  },
+  textSubDark: {
+    color: TEMA_BORDAS_COR_ESCURO,
+  },
+  optionRowDark: {
+    borderColor: '#475569',
+    backgroundColor: '#334155',
   },
 });

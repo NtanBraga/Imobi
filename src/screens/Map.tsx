@@ -1,4 +1,5 @@
 import { calcularDistancia } from '@/components/distancia';
+import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
 import { ZOOM_A_PE, ZOOM_TRANSITO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
@@ -545,7 +546,13 @@ export default function Map() {
             <Lucide
               name="home"
               size={24}
-              color={tabAtiva === 'NENHUM' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
+              color={
+                tabAtiva === 'NENHUM'
+                  ? '#0d9488'
+                  : isDark
+                    ? TEMA_BORDAS_COR_ESCURO
+                    : TEMA_BORDAS_COR_CLARO
+              }
             />
             <Text
               style={[
@@ -570,7 +577,13 @@ export default function Map() {
             <Lucide
               name="message-circle-warning"
               size={24}
-              color={tabAtiva === 'OCORRENCIA' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
+              color={
+                tabAtiva === 'OCORRENCIA'
+                  ? '#0d9488'
+                  : isDark
+                    ? TEMA_BORDAS_COR_ESCURO
+                    : TEMA_BORDAS_COR_CLARO
+              }
             />
             <Text
               style={[
@@ -602,7 +615,13 @@ export default function Map() {
             <Lucide
               name="store"
               size={24}
-              color={tabAtiva === 'LOJA' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
+              color={
+                tabAtiva === 'LOJA'
+                  ? '#0d9488'
+                  : isDark
+                    ? TEMA_BORDAS_COR_ESCURO
+                    : TEMA_BORDAS_COR_CLARO
+              }
             />
             <Text
               style={[
@@ -626,7 +645,13 @@ export default function Map() {
             <Lucide
               name="laugh"
               size={24}
-              color={tabAtiva === 'CARTEIRA' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
+              color={
+                tabAtiva === 'CARTEIRA'
+                  ? '#0d9488'
+                  : isDark
+                    ? TEMA_BORDAS_COR_ESCURO
+                    : TEMA_BORDAS_COR_CLARO
+              }
             />
             <Text style={[styles.navText, tabAtiva === 'CARTEIRA' && styles.navTextActive]}>
               Perfil
@@ -768,7 +793,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '#64748b',
+    color: TEMA_BORDAS_COR_CLARO,
     fontWeight: '500',
   },
   navTextActive: {
@@ -932,6 +957,6 @@ const styles = StyleSheet.create({
     borderTopColor: '#334155',
   },
   navTextDark: {
-    color: '#94a3b8',
+    color: TEMA_BORDAS_COR_ESCURO,
   },
 });
