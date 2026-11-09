@@ -88,7 +88,12 @@ export function OcorrenciaBottomSheet() {
 
         {/*Opcao: BURACO*/}
         <TouchableOpacity
-          style={[styles.optionRow, isDark && styles.optionRowDark]}
+          style={[
+            styles.optionRow,
+            isDark && styles.optionRowDark,
+            tipoSelecionado === TipoOcorrencia.BURACO &&
+              (isDark ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.BURACO)}
         >
           <View style={[styles.iconBox, { backgroundColor: 'blue' }]}>
@@ -103,7 +108,12 @@ export function OcorrenciaBottomSheet() {
 
         {/*Opcao: ARVORE CAIDA*/}
         <TouchableOpacity
-          style={styles.optionRow}
+          style={[
+            styles.optionRow,
+            isDark && styles.optionRowDark,
+            tipoSelecionado === TipoOcorrencia.ARVORE_CAIDA &&
+              (isDark ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.ARVORE_CAIDA)}
         >
           <View style={[styles.iconBox, { backgroundColor: 'green' }]}>
@@ -118,7 +128,12 @@ export function OcorrenciaBottomSheet() {
 
         {/*Opcao: RADAR*/}
         <TouchableOpacity
-          style={styles.optionRow}
+          style={[
+            styles.optionRow,
+            isDark && styles.optionRowDark,
+            tipoSelecionado === TipoOcorrencia.RADAR &&
+              (isDark ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.RADAR)}
         >
           <View style={[styles.iconBox, { backgroundColor: 'yellow' }]}>
@@ -133,7 +148,12 @@ export function OcorrenciaBottomSheet() {
 
         {/*Opcao: PEDESTRE MACHUCADO*/}
         <TouchableOpacity
-          style={styles.optionRow}
+          style={[
+            styles.optionRow,
+            isDark && styles.optionRowDark,
+            tipoSelecionado === TipoOcorrencia.PEDESTRE_MACHUCADO &&
+              (isDark ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.PEDESTRE_MACHUCADO)}
         >
           <View style={[styles.iconBox, { backgroundColor: 'orange' }]}>
@@ -148,7 +168,12 @@ export function OcorrenciaBottomSheet() {
 
         {/*Opcao: ZONA DE PERIGO TODO: SERIA MELHOR CRIAR UMA ZONA MESMO CIRCULO*/}
         <TouchableOpacity
-          style={styles.optionRow}
+          style={[
+            styles.optionRow,
+            isDark && styles.optionRowDark,
+            tipoSelecionado === TipoOcorrencia.ZONA_PERIGO &&
+              (isDark ? styles.optionSelectedDark : styles.optionSelected),
+          ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.ZONA_PERIGO)}
         >
           <View style={[styles.iconBox, { backgroundColor: 'red' }]}>
@@ -224,5 +249,15 @@ const styles = StyleSheet.create({
   optionRowDark: {
     borderColor: '#475569',
     backgroundColor: '#334155',
+  },
+  optionSelected: {
+    borderColor: '#0d9488',
+    borderWidth: 2,
+    backgroundColor: 'rgba(13, 148, 136, 0.1)',
+  },
+  optionSelectedDark: {
+    borderColor: '#2dd4bf',
+    borderWidth: 2,
+    backgroundColor: 'rgba(45, 212, 191, 0.15)',
   },
 });
