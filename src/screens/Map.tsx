@@ -177,77 +177,109 @@ export default function Map() {
     [destino, currentLocation, rotasPorModo, modoLocomocao],
   );
 
-  //rota dinamica
+  //rota dinamica (separaracao de rua e fora da rua)
   const statusNavegacao = useMemo(() => {
-    if (!currentLocation || rotaAtiva.length === 0)
-      return { rotaRenderizada: [], menorDistancia: 0 };
+    if (!currentLocation || !destino || rotaAtiva.length === 0)
+      return { trechosPontilhados: [], rotaRua: [], menorDistancia: 0 };
 
-    if (rotaAtiva.length === 1) {
-      const dist = calcularDistancia(
-        currentLocation.latitude,
-        currentLocation.longitude,
-        rotaAtiva[0].latitude,
-        rotaAtiva[0].longitude,
-      );
-      return {
-        rotaRenderizada:
-          modoLocomocao === ModoLocomocao.TRANSITO ? rotaAtiva : [currentLocation, rotaAtiva[0]],
-        menorDistancia: dist,
-      };
-    }
+    const distDiretaDestino = calcularDistancia(
+      currentLocation.latitude,
+      currentLocation.longitude,
+      destino.latitude,
+      destino.longitude,
+    );
 
     let melhorSegmento = 0;
     let menorDistancia = Infinity;
     let pontoNaRua = rotaAtiva[0];
 
-    //Projetar posicao do usuario em segmento A, B
-    for (let i = 0; i < rotaAtiva.length - 1; i++) {
-      const A = rotaAtiva[i];
-      const B = rotaAtiva[i + 1];
-
-      const dx = B.longitude - A.longitude;
-      const dy = B.latitude - A.latitude;
-      const lenSq = dx * dx + dy * dy;
-
-      let t = 0;
-
-      if (lenSq > 0) {
-        t =
-          ((currentLocation.longitude - A.longitude) * dx +
-            (currentLocation.latitude - A.latitude) * dy) /
-          lenSq;
-        t = Math.max(0, Math.min(1, t));
-      }
-      const proj = {
-        latitude: A.latitude + t * dy,
-        longitude: A.longitude + t * dx,
-      };
-
-      const dist = calcularDistancia(
+    if (rotaAtiva.length === 1) {
+      menorDistancia = calcularDistancia(
         currentLocation.latitude,
         currentLocation.longitude,
-        proj.latitude,
-        proj.longitude,
+        rotaAtiva[0].latitude,
+        rotaAtiva[0].longitude,
       );
-      if (dist < menorDistancia) {
-        menorDistancia = dist;
-        melhorSegmento = i;
-        pontoNaRua = proj;
+    } else {
+      //Projetar posicao do usuario em segmento A, B
+      for (let i = 0; i < rotaAtiva.length - 1; i++) {
+        const A = rotaAtiva[i];
+        const B = rotaAtiva[i + 1];
+
+        const dx = B.longitude - A.longitude;
+        const dy = B.latitude - A.latitude;
+        const lenSq = dx * dx + dy * dy;
+
+        let t = 0;
+
+        if (lenSq > 0) {
+          t =
+            ((currentLocation.longitude - A.longitude) * dx +
+              (currentLocation.latitude - A.latitude) * dy) /
+            lenSq;
+          t = Math.max(0, Math.min(1, t));
+        }
+        const proj = {
+          latitude: A.latitude + t * dy,
+          longitude: A.longitude + t * dx,
+        };
+
+        const dist = calcularDistancia(
+          currentLocation.latitude,
+          currentLocation.longitude,
+          proj.latitude,
+          proj.longitude,
+        );
+        if (dist < menorDistancia) {
+          menorDistancia = dist;
+          melhorSegmento = i;
+          pontoNaRua = proj;
+        }
       }
     }
 
     const pontosRestantes = rotaAtiva.slice(melhorSegmento + 1);
+    const rotaRua = [pontoNaRua, ...pontosRestantes];
 
     //Modo Transito, a linha se projeta na rua
-    const _rotaRenderizada =
-      modoLocomocao === ModoLocomocao.TRANSITO
-        ? [pontoNaRua, ...pontosRestantes]
-        : [currentLocation, pontoNaRua, ...pontosRestantes];
+    if (modoLocomocao === ModoLocomocao.TRANSITO) {
+      return { rotaRua, trechosPontilhados: [], menorDistancia };
+    }
 
-    return { _rotaRenderizada, menorDistancia };
-  }, [currentLocation, rotaAtiva, modoLocomocao]);
+    //Modo Pedestre
+    //ver se destino esta mais perto que a propria rua ou a menos de 25m
+    if (distDiretaDestino <= menorDistancia || distDiretaDestino <= 25) {
+      return {
+        rotaRua: [],
+        trechosPontilhados: [[currentLocation, destino]],
+        menorDistancia,
+      };
+    }
 
-  const rotaRenderizada = statusNavegacao._rotaRenderizada || [];
+    const trechosPontilhados: { latitude: number; longitude: number }[][] = [];
+
+    //Se trecho fora da rua inicial
+    if (menorDistancia > 3) {
+      trechosPontilhados.push([currentLocation, pontoNaRua]);
+    }
+
+    //trecho fora da rua final
+    const ultimoPontoRua = rotaAtiva[rotaAtiva.length - 1];
+    const distFimRuaAoDestino = calcularDistancia(
+      ultimoPontoRua.latitude,
+      ultimoPontoRua.longitude,
+      destino.latitude,
+      destino.longitude,
+    );
+
+    if (distFimRuaAoDestino > 3) {
+      trechosPontilhados.push([ultimoPontoRua, destino]);
+    }
+
+    return { rotaRua, trechosPontilhados, menorDistancia };
+  }, [currentLocation, destino, rotaAtiva, modoLocomocao]);
+
+  const { rotaRua, trechosPontilhados } = statusNavegacao;
 
   //Buscar dados no SQLite quando nenhuma tab ativa (para marcadores)
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
@@ -285,7 +317,18 @@ export default function Map() {
     }
 
     //Se desviou mais de 10 metros, e se moveu mais 5 metros do ponto inicial
-    if (rotaAtiva.length > 0 && statusNavegacao.menorDistancia > 15 && origemCalculadaRef.current) {
+    if (rotaAtiva.length > 0 && origemCalculadaRef.current && ultimoDestinoRef.current) {
+      //distancia que o usuario ja tinha da rua quando a rota foi criada
+      const folgaInicialForaDaRua = calcularDistancia(
+        origemCalculadaRef.current.latitude,
+        origemCalculadaRef.current.longitude,
+        rotaAtiva[0].latitude,
+        rotaAtiva[0].longitude,
+      );
+
+      const margemTolerancia = modoLocomocao === ModoLocomocao.A_PE ? 25 : 15;
+      const limiteDesvio = Math.max(margemTolerancia, folgaInicialForaDaRua + 15);
+
       const distDaOrigem = calcularDistancia(
         currentLocation.latitude,
         currentLocation.longitude,
@@ -293,7 +336,7 @@ export default function Map() {
         origemCalculadaRef.current.longitude,
       );
 
-      if (distDaOrigem > 5 && ultimoDestinoRef.current) {
+      if (statusNavegacao.menorDistancia > limiteDesvio && distDaOrigem > 15) {
         ultimoDestinoRef.current = null;
         rotaEmBuscaRef.current = null;
         requisicaoRotaRef.current += 1;
@@ -578,14 +621,25 @@ export default function Map() {
         pitchEnabled={true}
         showsBuildings={modoVisualizacao === ModoVisualizacao.OFF}
       >
-        {/*Renderizar Rotas*/}
-        {rotaRenderizada.length > 0 && (
+        {/*Renderizar Rotas na Rua*/}
+        {rotaRua.length > 1 && (
           <Polyline
-            coordinates={rotaRenderizada}
+            coordinates={rotaRua}
             strokeWidth={5}
             strokeColor={isDark ? '#60a5fa' : '#3b82f6'}
           />
         )}
+
+        {/*Renderizar Trechos fora da rua*/}
+        {trechosPontilhados.map((trecho, index) => (
+          <Polyline
+            key={`offroad-${index}`}
+            coordinates={trecho}
+            strokeWidth={5}
+            strokeColor={isDark ? '#38bdf8' : '#0284c7'}
+            lineDashPattern={[2, 12]}
+          />
+        ))}
 
         {/*Marcador Rota*/}
         {destino && <Marker coordinate={destino} title="Destino final" pinColor="red" />}
