@@ -34,6 +34,9 @@ export default function Map() {
   const mapRef = useRef<MapView>(null); // Referencia para manipular a camera
   const { abrirTab, tabAtiva, fecharTabs } = useUI();
 
+  //TEMA
+  const isDark = tema === 'NOITE';
+
   //Mock de movimento GPS --DEV
   const [devOffset, setDevOffset] = useState({ lat: 0, lng: 0 });
   const moveInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -442,7 +445,7 @@ export default function Map() {
 
       {/*Controles*/}
       <View style={styles.topControls}>
-        <View style={styles.toggleGroup}>
+        <View style={[styles.toggleGroup, isDark && styles.toggleGroupDark]}>
           {/*Alterar transito e a pe*/}
           <View style={styles.row}>
             <TouchableOpacity
@@ -455,6 +458,7 @@ export default function Map() {
               <Text
                 style={[
                   styles.modeText,
+                  isDark && styles.modeTextDark,
                   modoLocomocao === ModoLocomocao.TRANSITO && styles.activateModeText,
                 ]}
               >
@@ -472,6 +476,7 @@ export default function Map() {
               <Text
                 style={[
                   styles.modeText,
+                  isDark && styles.modeTextDark,
                   modoLocomocao === ModoLocomocao.A_PE && styles.activateModeText,
                 ]}
               >
@@ -480,9 +485,27 @@ export default function Map() {
             </TouchableOpacity>
           </View>
 
+          {/*Botao do tema (Dia e Noite)*/}
+          <TouchableOpacity
+            style={[
+              styles.themeToggle,
+              { backgroundColor: isDark ? 'white' : 'rgba(30, 41, 59, 0.95)' },
+            ]}
+            onPress={setTema}
+            activeOpacity={0.7}
+          >
+            <Lucide
+              name={isDark ? 'moon' : 'sun'}
+              size={24}
+              color={isDark ? '#60a5fa' : '#f59e0b'}
+            />
+          </TouchableOpacity>
+
           {/*Alterar Modo Off e Modo On*/}
           <TouchableOpacity style={styles.gamificationToggle} onPress={setModoVisualizacao}>
-            <Text style={styles.gamificationToggleText}>
+            <Text
+              style={[styles.gamificationToggleText, isDark && styles.gamificationToggleTextDark]}
+            >
               {modoVisualizacao === ModoVisualizacao.ON ? 'Modo On' : 'Modo Off'}
             </Text>
           </TouchableOpacity>
@@ -516,11 +539,21 @@ export default function Map() {
 
       {/*Botoes Navegacao*/}
       <View style={styles.bottomNavContainer}>
-        <View style={styles.bottomNavBar}>
+        <View style={[styles.bottomNavBar, isDark && styles.bottomNavBarDark]}>
           {/*Inicio mapa*/}
           <TouchableOpacity style={styles.navItem} onPress={fecharTabs} activeOpacity={0.7}>
-            <Lucide name="home" size={24} color={tabAtiva === 'NENHUM' ? '#0d9488' : '#64748b'} />
-            <Text style={[styles.navText, tabAtiva === 'NENHUM' && styles.navTextActive]}>
+            <Lucide
+              name="home"
+              size={24}
+              color={tabAtiva === 'NENHUM' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
+            />
+            <Text
+              style={[
+                styles.navText,
+                isDark && styles.navTextDark,
+                tabAtiva === 'NENHUM' && styles.navTextActive,
+              ]}
+            >
               Início
             </Text>
           </TouchableOpacity>
@@ -537,9 +570,15 @@ export default function Map() {
             <Lucide
               name="message-circle-warning"
               size={24}
-              color={tabAtiva === 'OCORRENCIA' ? '#0d9488' : '#64748b'}
+              color={tabAtiva === 'OCORRENCIA' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
             />
-            <Text style={[styles.navText, tabAtiva === 'OCORRENCIA' && styles.navTextActive]}>
+            <Text
+              style={[
+                styles.navText,
+                isDark && styles.navTextDark,
+                tabAtiva === 'OCORRENCIA' && styles.navTextActive,
+              ]}
+            >
               Reportar
             </Text>
           </TouchableOpacity>
@@ -560,8 +599,18 @@ export default function Map() {
             }}
             activeOpacity={0.7}
           >
-            <Lucide name="store" size={24} color={tabAtiva === 'LOJA' ? '#0d9488' : '#64748b'} />
-            <Text style={[styles.navText, tabAtiva === 'LOJA' && styles.navTextActive]}>
+            <Lucide
+              name="store"
+              size={24}
+              color={tabAtiva === 'LOJA' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
+            />
+            <Text
+              style={[
+                styles.navText,
+                isDark && styles.navTextDark,
+                tabAtiva === 'LOJA' && styles.navTextActive,
+              ]}
+            >
               Registrar
             </Text>
           </TouchableOpacity>
@@ -577,7 +626,7 @@ export default function Map() {
             <Lucide
               name="laugh"
               size={24}
-              color={tabAtiva === 'CARTEIRA' ? '#0d9488' : '#64748b'}
+              color={tabAtiva === 'CARTEIRA' ? '#0d9488' : isDark ? '#94a3b8' : '#64748b'}
             />
             <Text style={[styles.navText, tabAtiva === 'CARTEIRA' && styles.navTextActive]}>
               Perfil
@@ -659,6 +708,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 15,
   },
 
@@ -859,5 +909,29 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  toggleGroupDark: {
+    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+  },
+  themeToggle: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    padding: 15,
+    borderRadius: 10,
+  },
+  modeTextDark: {
+    color: '#cbd5e1',
+  },
+  gamificationToggleTextDark: {
+    color: '#60a5fa',
+  },
+  bottomNavBarDark: {
+    backgroundColor: '#1e293b',
+    borderTopColor: '#334155',
+  },
+  navTextDark: {
+    color: '#94a3b8',
   },
 });
