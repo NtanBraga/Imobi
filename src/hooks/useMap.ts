@@ -8,10 +8,12 @@ interface MapState {
   modoLocomocao: ModoLocomocao;
   coordenadaFoco: { latitude: number; longitude: number } | null;
   tema: Tema;
+  destino: { latitude: number; longitude: number } | null;
   setModoLocomocao: (modo: ModoLocomocao) => void;
   setModoVisualizacao: () => void;
   setCoordenadaFoco: (coordenada: { latitude: number; longitude: number } | null) => void;
   setTema: () => void;
+  setDestino: (coordenada: { latitude: number; longitude: number } | null) => void;
 }
 
 export const useMap = create<MapState>((set) => ({
@@ -22,6 +24,8 @@ export const useMap = create<MapState>((set) => ({
   coordenadaFoco: null,
 
   tema: 'DIA',
+
+  destino: null,
 
   setModoLocomocao: (modo) => set({ modoLocomocao: modo }),
 
@@ -34,4 +38,6 @@ export const useMap = create<MapState>((set) => ({
   setCoordenadaFoco: (coordenada) => set({ coordenadaFoco: coordenada }),
 
   setTema: () => set((state) => ({ tema: state.tema === 'DIA' ? 'NOITE' : 'DIA' })),
+
+  setDestino: (coordenada) => set({ destino: coordenada }),
 }));
