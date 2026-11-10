@@ -1,6 +1,20 @@
 import { calcularDistancia } from '@/components/distancia';
 import { calcularRotaApi } from '@/components/path';
-import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
+import {
+  COR_BRANCO,
+  COR_DESTAQUE,
+  COR_PRETO,
+  COR_ROTA_CLARO,
+  COR_ROTA_ESCURO,
+  COR_ROTA_PEDESTRE_CLARO,
+  COR_ROTA_PEDESTRE_ESCURO,
+  COR_TEXTO_ESCURO,
+  TEMA_BORDAS_COR_CLARO,
+  TEMA_BORDAS_COR_ESCURO,
+  TEMA_FUNDO_ESCURO,
+  TEMA_FUNDO_SECUNDARIO_ESCURO,
+  TEMA_TEXTO_CLARO,
+} from '@/constants/cores';
 import { ZOOM_A_PE, ZOOM_TRANSITO } from '@/constants/mapa';
 import { RAIO_COLETA_MOEDA_METROS, VALOR_PADRAO_MOEDA } from '@/constants/moedas';
 import { db } from '@/database';
@@ -626,7 +640,7 @@ export default function Map() {
           <Polyline
             coordinates={rotaRua}
             strokeWidth={5}
-            strokeColor={isDark ? '#60a5fa' : '#3b82f6'}
+            strokeColor={isDark ? COR_ROTA_ESCURO : COR_ROTA_CLARO}
           />
         )}
 
@@ -636,7 +650,7 @@ export default function Map() {
             key={`offroad-${index}`}
             coordinates={trecho}
             strokeWidth={5}
-            strokeColor={isDark ? '#38bdf8' : '#0284c7'}
+            strokeColor={isDark ? COR_ROTA_PEDESTRE_ESCURO : COR_ROTA_PEDESTRE_CLARO}
             lineDashPattern={[2, 12]}
           />
         ))}
@@ -742,7 +756,7 @@ export default function Map() {
           <TouchableOpacity
             style={[
               styles.themeToggle,
-              { backgroundColor: isDark ? 'white' : 'rgba(30, 41, 59, 0.95)' },
+              { backgroundColor: isDark ? COR_BRANCO : 'rgba(30, 41, 59, 0.95)' },
             ]}
             onPress={setTema}
             activeOpacity={0.7}
@@ -750,7 +764,7 @@ export default function Map() {
             <Lucide
               name={isDark ? 'moon' : 'sun'}
               size={24}
-              color={isDark ? '#60a5fa' : '#f59e0b'}
+              color={isDark ? COR_ROTA_ESCURO : '#f59e0b'}
             />
           </TouchableOpacity>
 
@@ -800,7 +814,7 @@ export default function Map() {
               size={24}
               color={
                 tabAtiva === 'NENHUM'
-                  ? '#0d9488'
+                  ? COR_DESTAQUE
                   : isDark
                     ? TEMA_BORDAS_COR_ESCURO
                     : TEMA_BORDAS_COR_CLARO
@@ -831,7 +845,7 @@ export default function Map() {
               size={24}
               color={
                 tabAtiva === 'OCORRENCIA'
-                  ? '#0d9488'
+                  ? COR_DESTAQUE
                   : isDark
                     ? TEMA_BORDAS_COR_ESCURO
                     : TEMA_BORDAS_COR_CLARO
@@ -855,7 +869,7 @@ export default function Map() {
               onPress={() => abrirTab('ROTA')}
               activeOpacity={0.85}
             >
-              <Lucide name="plus" size={32} color={'white'} />
+              <Lucide name="plus" size={32} color={COR_BRANCO} />
             </TouchableOpacity>
           </View>
 
@@ -903,7 +917,7 @@ export default function Map() {
               size={24}
               color={
                 tabAtiva === 'CARTEIRA'
-                  ? '#0d9488'
+                  ? COR_DESTAQUE
                   : isDark
                     ? TEMA_BORDAS_COR_ESCURO
                     : TEMA_BORDAS_COR_CLARO
@@ -1008,7 +1022,7 @@ const styles = StyleSheet.create({
   },
 
   activateModeText: {
-    color: 'white',
+    color: COR_BRANCO,
   },
 
   gamificationToggle: {
@@ -1028,16 +1042,16 @@ const styles = StyleSheet.create({
   },
   bottomNavBar: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: COR_BRANCO,
     height: 76,
     paddingBottom: 12,
     paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'space-around',
     borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
+    borderTopColor: TEMA_TEXTO_CLARO,
     elevation: 16,
-    shadowColor: 'black',
+    shadowColor: COR_TEXTO_ESCURO,
     shadowOffset: { width: 0, height: -4 },
     shadowRadius: 8,
   },
@@ -1053,7 +1067,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   navTextActive: {
-    color: '#0d9488',
+    color: COR_DESTAQUE,
     fontWeight: '700',
   },
   plusButtonWrapper: {
@@ -1082,14 +1096,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 36,
     borderRadius: 30,
     elevation: 8,
-    shadowColor: 'black',
+    shadowColor: COR_PRETO,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
   menuButtonText: {
     fontSize: 18,
-    color: 'white',
+    color: COR_BRANCO,
     fontWeight: 'bold',
   },
   avatarContainer: {
@@ -1117,7 +1131,7 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   dpadBtn: {
-    backgroundColor: 'white',
+    backgroundColor: COR_BRANCO,
     padding: 12,
     borderRadius: 10,
   },
@@ -1134,7 +1148,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   deleteDbText: {
-    color: 'white',
+    color: COR_BRANCO,
     fontWeight: 'bold',
   },
   moedaIcon: {
@@ -1153,7 +1167,7 @@ const styles = StyleSheet.create({
     top: 130,
     left: 20,
     right: 20,
-    backgroundColor: 'white',
+    backgroundColor: COR_BRANCO,
     padding: 20,
     borderRadius: 15,
     elevation: 10,
@@ -1168,7 +1182,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: '#333',
+    color: COR_TEXTO_ESCURO,
   },
   validacaoText: {
     fontSize: 14,
@@ -1206,11 +1220,11 @@ const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
   gamificationToggleTextDark: {
-    color: '#60a5fa',
+    color: COR_ROTA_ESCURO,
   },
   bottomNavBarDark: {
-    backgroundColor: '#1e293b',
-    borderTopColor: '#334155',
+    backgroundColor: TEMA_FUNDO_ESCURO,
+    borderTopColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
   },
   navTextDark: {
     color: TEMA_BORDAS_COR_ESCURO,
