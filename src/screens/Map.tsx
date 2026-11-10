@@ -850,7 +850,11 @@ export default function Map() {
 
           {/*Botão central (+)*/}
           <View style={styles.plusButtonWrapper}>
-            <TouchableOpacity style={styles.plusButton} onPress={() => {}} activeOpacity={0.85}>
+            <TouchableOpacity
+              style={styles.plusButton}
+              onPress={() => abrirTab('ROTA')}
+              activeOpacity={0.85}
+            >
               <Lucide name="plus" size={32} color={'white'} />
             </TouchableOpacity>
           </View>
