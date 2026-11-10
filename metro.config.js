@@ -11,7 +11,7 @@ module.exports = (() => {
 
     config.resolver = {
         ...resolver,
-        sourceExts: [...resolver.sourceExts, 'scss', 'saas']
+        sourceExts: [...resolver.sourceExts, 'scss', 'sass']
     }
 
     return config

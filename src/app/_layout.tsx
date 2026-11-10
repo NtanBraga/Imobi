@@ -1,10 +1,10 @@
 import { initializeDatabase } from '@/database';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { NavigationBar } from 'expo-navigation-bar';
+import * as NavigationBar from 'expo-navigation-bar';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function StackLayout() {
@@ -36,7 +36,7 @@ export default function StackLayout() {
       <BottomSheetModalProvider>
         {/*Controladores de tela*/}
         <StatusBar hidden />
-        <NavigationBar hidden />
+        {Platform.OS === 'android' && <NavigationBar.NavigationBar hidden={true} />}
 
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />

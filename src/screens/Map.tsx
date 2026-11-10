@@ -59,7 +59,7 @@ export default function Map() {
   const moveInterval = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timerGamificacao = useRef<number>(0);
   const isProcessingGamificacao = useRef<boolean>(false);
-  const isEnabledDevMode = true;
+  const isEnabledDevMode = __DEV__;
 
   const startMoving = (dLat: number, dLng: number) => {
     stopMoving();
@@ -629,7 +629,7 @@ export default function Map() {
           requisicaoRotaRef.current += 1;
           setDestino(e.nativeEvent.coordinate);
         }}
-        showsUserLocation={!isEnabledDevMode}
+        showsUserLocation={isEnabledDevMode}
         showsCompass={false}
         showsMyLocationButton={false}
         pitchEnabled={true}
@@ -658,8 +658,8 @@ export default function Map() {
         {/*Marcador Rota*/}
         {destino && <Marker coordinate={destino} title="Destino final" pinColor="red" />}
 
-        {/*Marcador Dev*/}
-        {isEnabledDevMode && currentLocation && (
+        {/*Marcador*/}
+        {currentLocation && (
           <Marker
             key={`player-${usuarioAtivo?.avatarId || 'default'}`}
             coordinate={currentLocation}

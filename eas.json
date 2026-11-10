@@ -12,10 +12,19 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyDw2sjXBcOhm0KNRea1u0kL7UbGBmtK1EI"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyDw2sjXBcOhm0KNRea1u0kL7UbGBmtK1EI"
+      }
     }
   },
   "submit": {
