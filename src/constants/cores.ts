@@ -6,19 +6,20 @@ export const COR_PRETO = '#000000';
 export const COR_CINZA = 'gray';
 
 // Texto
-export const COR_TEXTO_PADRAO = '#333333';
-export const COR_TEXTO_ESCURO = '#F1F5F9';
+
+export const TEMA_TEXTO_CLARO = '#F1F5F9';
 export const COR_TEXTO_SECUNDARIO = '#64748B';
+export const COR_TEXTO_ESCURO = '#333333';
+export const TEMA_TEXTO_SECUNDARIO_ESCURO = '#94A3B8';
 
 //Temas
 export const TEMA_BORDAS_COR_ESCURO = '#94a3b8';
+export const TEMA_BORDAS_COR_SECUNDARIA_ESCURO = '#475569';
 export const TEMA_BORDAS_COR_CLARO = '#64748b';
+export const TEMA_BORDAS_COR_SECUNDARIA_CLARO = COR_CINZA;
 export const TEMA_FUNDO_CLARO = COR_BRANCO;
 export const TEMA_FUNDO_ESCURO = '#1E293B';
 export const TEMA_FUNDO_SECUNDARIO_ESCURO = '#334155';
-
-export const TEMA_TEXTO_CLARO = '#F1F5F9';
-export const TEMA_TEXTO_SECUNDARIO_ESCURO = '#94A3B8';
 
 //Cores identidades
 export const COR_PRIMARIA = '#2A9D8F';

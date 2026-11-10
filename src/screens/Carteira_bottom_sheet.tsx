@@ -1,4 +1,20 @@
-import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
+import {
+  COR_AVISO_ESCURO,
+  COR_BRANCO,
+  COR_CINZA,
+  COR_PRETO,
+  COR_PRIMARIA,
+  COR_SUCESSO,
+  COR_SUCESSO_ESCURO,
+  TEMA_BORDAS_COR_CLARO,
+  TEMA_BORDAS_COR_ESCURO,
+  TEMA_BORDAS_COR_SECUNDARIA_CLARO,
+  TEMA_BORDAS_COR_SECUNDARIA_ESCURO,
+  TEMA_FUNDO_CLARO,
+  TEMA_FUNDO_ESCURO,
+  TEMA_FUNDO_SECUNDARIO_ESCURO,
+  TEMA_TEXTO_CLARO,
+} from '@/constants/cores';
 import { db } from '@/database';
 import { AvatarRepository } from '@/database/repositories/AvatarRepo';
 import { useMap, useUI, useUser, useWallet } from '@/hooks';
@@ -148,7 +164,7 @@ export function CarteiraBottomSheet() {
       }}
       backgroundStyle={{
         borderRadius: 24,
-        backgroundColor: isDark ? '#1e293b' : 'white',
+        backgroundColor: isDark ? TEMA_FUNDO_ESCURO : TEMA_FUNDO_CLARO,
       }}
     >
       <BottomSheetFlatList
@@ -180,7 +196,14 @@ export function CarteiraBottomSheet() {
                 </View>
               ) : inventarioAvatares.includes(item.id) ? (
                 <View
-                  style={[styles.badgeEquipped, { backgroundColor: isDark ? '#475569' : 'gray' }]}
+                  style={[
+                    styles.badgeEquipped,
+                    {
+                      backgroundColor: isDark
+                        ? TEMA_BORDAS_COR_SECUNDARIA_ESCURO
+                        : TEMA_BORDAS_COR_SECUNDARIA_CLARO,
+                    },
+                  ]}
                 >
                   <Text style={styles.badgeText}>Usar</Text>
                 </View>
@@ -200,7 +223,7 @@ export function CarteiraBottomSheet() {
 const styles = StyleSheet.create({
   subtitle: {
     fontSize: 12,
-    color: '#2a9d8f',
+    color: COR_PRIMARIA,
     fontWeight: 'bold',
   },
   title: {
@@ -210,7 +233,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: 'gray',
+    color: COR_CINZA,
     marginBottom: 24,
   },
   rewardCard: {
@@ -220,7 +243,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'orange',
     borderRadius: 16,
-    backgroundColor: 'white',
+    backgroundColor: COR_BRANCO,
     marginBottom: 24,
   },
   rewardInfo: {
@@ -232,7 +255,7 @@ const styles = StyleSheet.create({
   },
   rewardDesc: {
     fontSize: 12,
-    color: 'gray',
+    color: COR_CINZA,
     marginTop: 4,
   },
   claimButton: {
@@ -242,7 +265,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   claimText: {
-    color: 'white',
+    color: COR_BRANCO,
     fontWeight: 'bold',
   },
   row: {
@@ -258,18 +281,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: COR_PRETO,
     marginBottom: 10,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: COR_BRANCO,
     width: '40%',
     padding: 10,
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 15,
     elevation: 2,
-    shadowColor: 'black',
+    shadowColor: COR_PRETO,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.5,
@@ -284,7 +307,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   cardEquipped: {
-    borderColor: '#4CAF50',
+    borderColor: COR_SUCESSO,
     borderWidth: 2,
   },
   cardPrice: {
@@ -293,34 +316,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   badgeEquipped: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: COR_SUCESSO,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 10,
   },
   badgeText: {
-    color: 'white',
+    color: COR_BRANCO,
     fontSize: 12,
     fontWeight: 'bold',
   },
   textDark: {
-    color: '#f1f5f9',
+    color: TEMA_TEXTO_CLARO,
   },
   textSubDark: {
     color: TEMA_BORDAS_COR_ESCURO,
   },
   rewardCardDark: {
-    backgroundColor: '#334155',
-    borderColor: '#b45309',
+    backgroundColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
+    borderColor: COR_AVISO_ESCURO,
   },
   cardDark: {
-    backgroundColor: '#334155',
+    backgroundColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
   },
   cardEquippedDark: {
-    borderColor: '#22c55e',
+    borderColor: COR_SUCESSO,
     borderWidth: 2,
   },
   badgeEquippedDark: {
-    backgroundColor: '#166534',
+    backgroundColor: COR_SUCESSO_ESCURO,
   },
 });
