@@ -1,4 +1,23 @@
-import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
+import {
+  COR_ARVORE_CAIDA,
+  COR_BRANCO,
+  COR_BURACO,
+  COR_DESTAQUE,
+  COR_DESTAQUE_ESCURO,
+  COR_PEDESTRE_MACHUCADO,
+  COR_PRETO,
+  COR_PRIMARIA_ESCURO,
+  COR_RADAR,
+  COR_SELECAO_ESCURO,
+  COR_ZONA_PERIGO,
+  TEMA_BORDAS_COR_CLARO,
+  TEMA_BORDAS_COR_ESCURO,
+  TEMA_BORDAS_COR_SECUNDARIA_ESCURO,
+  TEMA_FUNDO_CLARO,
+  TEMA_FUNDO_ESCURO,
+  TEMA_FUNDO_SECUNDARIO_ESCURO,
+  TEMA_TEXTO_CLARO,
+} from '@/constants/cores';
 import { db } from '@/database';
 import { OcorrenciaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI, useWallet } from '@/hooks';
@@ -81,7 +100,10 @@ export function OcorrenciaBottomSheet() {
         backgroundColor: isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO,
         width: 40,
       }}
-      backgroundStyle={{ borderRadius: 24, backgroundColor: isDark ? '#1e293b' : 'white' }}
+      backgroundStyle={{
+        borderRadius: 24,
+        backgroundColor: isDark ? TEMA_FUNDO_ESCURO : TEMA_FUNDO_CLARO,
+      }}
     >
       <BottomSheetView style={[styles.contentContainer, isDark && styles.contentContainerDark]}>
         <Text style={[styles.title, isDark && styles.textDark]}>Selecione um risco.</Text>
@@ -96,7 +118,7 @@ export function OcorrenciaBottomSheet() {
           ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.BURACO)}
         >
-          <View style={[styles.iconBox, { backgroundColor: 'blue' }]}>
+          <View style={[styles.iconBox, { backgroundColor: COR_BURACO }]}>
             <Text style={styles.iconText}>!</Text>
           </View>
 
@@ -116,7 +138,7 @@ export function OcorrenciaBottomSheet() {
           ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.ARVORE_CAIDA)}
         >
-          <View style={[styles.iconBox, { backgroundColor: 'green' }]}>
+          <View style={[styles.iconBox, { backgroundColor: COR_ARVORE_CAIDA }]}>
             <Text style={styles.iconText}>!</Text>
           </View>
 
@@ -136,7 +158,7 @@ export function OcorrenciaBottomSheet() {
           ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.RADAR)}
         >
-          <View style={[styles.iconBox, { backgroundColor: 'yellow' }]}>
+          <View style={[styles.iconBox, { backgroundColor: COR_RADAR }]}>
             <Text style={styles.iconText}>!</Text>
           </View>
 
@@ -156,7 +178,7 @@ export function OcorrenciaBottomSheet() {
           ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.PEDESTRE_MACHUCADO)}
         >
-          <View style={[styles.iconBox, { backgroundColor: 'orange' }]}>
+          <View style={[styles.iconBox, { backgroundColor: COR_PEDESTRE_MACHUCADO }]}>
             <Text style={styles.iconText}>!</Text>
           </View>
 
@@ -176,7 +198,7 @@ export function OcorrenciaBottomSheet() {
           ]}
           onPress={() => setTipoSelecionado(TipoOcorrencia.ZONA_PERIGO)}
         >
-          <View style={[styles.iconBox, { backgroundColor: 'red' }]}>
+          <View style={[styles.iconBox, { backgroundColor: COR_ZONA_PERIGO }]}>
             <Text style={styles.iconText}>!</Text>
           </View>
 
@@ -211,7 +233,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: COR_PRETO,
     borderRadius: 10,
   },
   iconBox: {
@@ -223,41 +245,41 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   iconText: {
-    color: 'white',
+    color: COR_BRANCO,
     fontWeight: 'bold',
   },
   confirmButton: {
     marginTop: 'auto',
-    backgroundColor: '#0f7a65',
+    backgroundColor: COR_PRIMARIA_ESCURO,
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
   },
   confirmButtonText: {
-    color: 'white',
+    color: COR_BRANCO,
     fontWeight: 'bold',
   },
   contentContainerDark: {
-    backgroundColor: '#1e293b',
+    backgroundColor: TEMA_FUNDO_ESCURO,
   },
   textDark: {
-    color: '#f1f5f9',
+    color: TEMA_TEXTO_CLARO,
   },
   textSubDark: {
     color: TEMA_BORDAS_COR_ESCURO,
   },
   optionRowDark: {
-    borderColor: '#475569',
-    backgroundColor: '#334155',
+    borderColor: TEMA_BORDAS_COR_SECUNDARIA_ESCURO,
+    backgroundColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
   },
   optionSelected: {
-    borderColor: '#0d9488',
+    borderColor: COR_DESTAQUE,
     borderWidth: 2,
     backgroundColor: 'rgba(13, 148, 136, 0.1)',
   },
   optionSelectedDark: {
-    borderColor: '#2dd4bf',
+    borderColor: COR_DESTAQUE_ESCURO,
     borderWidth: 2,
-    backgroundColor: 'rgba(45, 212, 191, 0.15)',
+    backgroundColor: COR_SELECAO_ESCURO,
   },
 });

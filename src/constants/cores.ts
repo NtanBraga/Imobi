@@ -24,7 +24,7 @@ export const TEMA_FUNDO_SECUNDARIO_ESCURO = '#334155';
 //Cores identidades
 export const COR_PRIMARIA = '#2A9D8F';
 export const COR_PRIMARIA_ESCURO = '#0F7A65';
-export const COR_DESTAQUE = '#0D94B8';
+export const COR_DESTAQUE = '#0D9488';
 export const COR_DESTAQUE_ESCURO = '#2DD4BF';
 export const COR_SELECAO_CLARO = '#E6F7F4';
 export const COR_SELECAO_ESCURO = 'rgba(45, 212, 191, 0.15)';
