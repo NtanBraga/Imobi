@@ -1,9 +1,14 @@
+import { buscarCoordenadasLugar, buscarSugestaoLugar, SugestaoLugar } from '@/components/path';
 import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
 import { useMap, useUI } from '@/hooks';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { useEffect, useRef } from 'react';
-import { StyleSheet, Text } from 'react-native';
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetModal,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 
 export function RotaButtomSheet() {
   const bottomSheetRef = useRef<BottomSheetModal>(null);
@@ -11,6 +16,10 @@ export function RotaButtomSheet() {
 
   const { tabAtiva, fecharTabs } = useUI();
   const { tema, setDestino } = useMap();
+
+  const [busca, setBusca] = useState('');
+  const [sugestoes, setSugestoes] = useState<SugestaoLugar[]>([]);
+  const [carregando, setCarregando] = useState(false);
 
   const isDark = tema === 'NOITE';
 
@@ -22,8 +31,35 @@ export function RotaButtomSheet() {
     } else if (isMountedRef.current) {
       isMountedRef.current = false;
       bottomSheetRef.current?.dismiss();
+      setBusca('');
+      setSugestoes([]);
     }
   }, [tabAtiva]);
+
+  useEffect(() => {
+    if (busca.trim().length < 3) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setCarregando(true);
+      const resultados = await buscarSugestaoLugar(busca);
+      setSugestoes(resultados);
+      setCarregando(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [busca]);
+
+  const selecionarDestino = async (placeId: string) => {
+    setCarregando(true);
+    const coordenada = await buscarCoordenadasLugar(placeId);
+    setCarregando(false);
+
+    if (coordenada) {
+      setDestino(coordenada);
+      fecharTabs();
+    }
+  };
 
   return (
     <BottomSheetModal
@@ -54,65 +90,41 @@ export function RotaButtomSheet() {
           Digite o endereço ou nome do local
         </Text>
 
-        <GooglePlacesAutocomplete
+        <TextInput
+          style={[styles.input, isDark && styles.inputDark]}
           placeholder="Buscar destino..."
-          fetchDetails={true} // pegar latitude e longitude
-          onPress={(data, details = null) => {
-            if (details?.geometry?.location) {
-              setDestino({
-                latitude: details.geometry.location.lat,
-                longitude: details.geometry.location.lng,
-              });
-              fecharTabs();
-            }
-          }}
-          query={{
-            key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
-            language: 'pt-BR',
-            components: 'country:br',
-          }}
-          styles={{
-            container: { flex: 1 },
-            textInputContainer: {
-              width: '100%',
-              backgroundColor: 'transparent',
-              borderTopWidth: 0,
-              borderBottomWidth: 0,
-            },
-            textInput: {
-              height: 64,
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              fontSize: 16,
-              backgroundColor: isDark ? '#0f172a' : '#f1f5f9',
-              color: isDark ? '#f8fafc' : '#333',
-              borderWidth: 1,
-              borderColor: isDark ? '#334155' : '#e2e8f0',
-            },
-            listView: {
-              backgroundColor: isDark ? '#1e293b' : 'white',
-              marginTop: 10,
-              borderRadius: 12,
-              elevation: 2,
-              shadowColor: 'black',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-            },
-            row: {
-              backgroundColor: isDark ? '#1e293b' : 'white',
-              padding: 13,
-              height: 58,
-              flexDirection: 'row',
-              borderBottomWidth: 1,
-              borderBottomColor: isDark ? '#334155' : '#f1f5f9',
-            },
-            description: {
-              color: isDark ? '#cbd5e1' : 'white',
-              fontSize: 15,
-            },
-          }}
-          textInputProps={{ placeholderTextColor: isDark ? '#94a3b8' : 'gray' }}
+          placeholderTextColor={isDark ? '#94a3b8' : 'gray'}
+          value={busca}
+          onChangeText={setBusca}
+          autoCorrect={false}
+        />
+
+        {carregando && (
+          <ActivityIndicator
+            size="small"
+            color={isDark ? '#38bdf8' : '#0d9488'}
+            style={{ marginVertical: 10 }}
+          />
+        )}
+
+        <BottomSheetFlatList
+          data={sugestoes}
+          keyExtractor={(item) => item.placeId}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.suggestionRow, isDark && styles.suggestionRowDark]}
+              onPress={() => selecionarDestino(item.placeId)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.suggestionTitle, isDark && styles.textDark]}>{item.titulo}</Text>
+              {!!item.subtitulo && (
+                <Text style={[styles.suggestionSub, isDark && styles.textSubDark]}>
+                  {item.subtitulo}
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
         />
       </BottomSheetView>
     </BottomSheetModal>
@@ -126,6 +138,22 @@ const styles = StyleSheet.create({
   },
   contentContainerDark: {
     backgroundColor: '#1e293b',
+  },
+  input: {
+    height: 56,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    backgroundColor: '#f1f5f9',
+    color: '#333',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginBottom: 12,
+  },
+  inputDark: {
+    backgroundColor: '#0f172a',
+    color: '#f8fafc',
+    borderColor: '#334155',
   },
   title: {
     fontSize: 25,
@@ -143,5 +171,24 @@ const styles = StyleSheet.create({
   },
   textSubDark: {
     color: '#94a3b8',
+  },
+  suggestionRow: {
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  suggestionRowDark: {
+    borderBottomColor: '#334155',
+  },
+  suggestionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  suggestionSub: {
+    fontSize: 13,
+    color: '#64748b',
+    marginTop: 2,
   },
 });

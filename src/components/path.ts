@@ -100,7 +100,7 @@ export const buscarSugestaoLugar = async (texto: string): Promise<SugestaoLugar[
       body: JSON.stringify({
         input: texto,
         languageCode: 'pt-BR',
-        includedRegionCode: ['br'],
+        includedRegionCodes: ['br'],
       }),
     });
     const data = await response.json();
