@@ -1,4 +1,18 @@
-import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
+import {
+  COR_BRANCO,
+  COR_CINZA,
+  COR_DESABILITADO,
+  COR_PRETO,
+  COR_PRIMARIA,
+  COR_PRIMARIA_ESCURO,
+  TEMA_BORDAS_COR_CLARO,
+  TEMA_BORDAS_COR_ESCURO,
+  TEMA_BORDAS_COR_SECUNDARIA_ESCURO,
+  TEMA_FUNDO_CLARO,
+  TEMA_FUNDO_ESCURO,
+  TEMA_FUNDO_SECUNDARIO_ESCURO,
+  TEMA_TEXTO_CLARO,
+} from '@/constants/cores';
 import { db } from '@/database';
 import { LojaRepository } from '@/database/repositories';
 import { useLocation, useMap, useUI, useWallet } from '@/hooks';
@@ -86,7 +100,7 @@ export function LojaBottomSheet() {
       }}
       backgroundStyle={{
         borderRadius: 24,
-        backgroundColor: isDark ? '#1e293b' : 'white',
+        backgroundColor: isDark ? TEMA_FUNDO_ESCURO : TEMA_FUNDO_CLARO,
       }}
     >
       <BottomSheetView style={[styles.contentContainer, isDark && styles.contentContainerDark]}>
@@ -154,28 +168,28 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 25,
     fontWeight: 'bold',
-    color: 'black',
+    color: COR_PRETO,
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: 'gray',
+    color: COR_CINZA,
     marginBottom: 20,
   },
   input: {
-    backgroundColor: 'white',
+    backgroundColor: COR_BRANCO,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: COR_PRETO,
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     marginBottom: 20,
-    color: '#333',
+    color: COR_PRETO,
   },
   label: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: 'black',
+    color: COR_PRETO,
     marginBottom: 10,
   },
   categoryContainer: {
@@ -193,48 +207,48 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   categoryBadgeSelected: {
-    borderColor: '#2A9D8F',
+    borderColor: COR_PRIMARIA,
     backgroundColor: '#e6f7f4',
   },
   categoryText: {
-    color: 'gray',
+    color: COR_CINZA,
     fontWeight: '600',
   },
   categoryTextSelected: {
-    color: '#0f7a65',
+    color: COR_PRIMARIA_ESCURO,
   },
   confirmButton: {
     marginTop: 'auto',
-    backgroundColor: '#2a9d8f',
+    backgroundColor: COR_PRIMARIA,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
   confirmButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: COR_DESABILITADO,
   },
   confirmText: {
-    color: 'white',
+    color: COR_BRANCO,
     fontWeight: 'bold',
     fontSize: 16,
   },
   contentContainerDark: {
-    backgroundColor: '#1e293b',
+    backgroundColor: TEMA_FUNDO_ESCURO,
   },
   textDark: {
-    color: '#f1f5f9',
+    color: TEMA_TEXTO_CLARO,
   },
   textSubDark: {
     color: TEMA_BORDAS_COR_ESCURO,
   },
   inputDark: {
-    backgroundColor: '#0f172a',
-    borderColor: '#334155',
-    color: '#f8fafc',
+    backgroundColor: COR_PRETO,
+    borderColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
+    color: COR_BRANCO,
   },
   categoryBadgeDark: {
-    backgroundColor: '#334155',
-    borderColor: '#475569',
+    backgroundColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
+    borderColor: TEMA_BORDAS_COR_SECUNDARIA_ESCURO,
   },
   categoryBadgeSelectedDark: {
     borderColor: '#2dd4bf',

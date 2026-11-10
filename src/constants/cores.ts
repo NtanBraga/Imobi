@@ -50,4 +50,3 @@ export const COR_ROTA_ESCURO = '#60A5FA';
 export const COR_ROTA_PEDESTRE_CLARO = '#0284C7';
 export const COR_ROTA_PEDESTRE_ESCURO = '#38BDF8';
 export const COR_FUNDO_MAPA_ESCURO = 'rgba(30, 41, 59, 0.95)';
-export const COR_SOMBRA = 'black';
