@@ -1,5 +1,17 @@
 import { buscarCoordenadasLugar, buscarSugestaoLugar, SugestaoLugar } from '@/components/path';
-import { TEMA_BORDAS_COR_CLARO, TEMA_BORDAS_COR_ESCURO } from '@/constants/cores';
+import {
+  COR_CINZA,
+  COR_DESTAQUE,
+  COR_DESTAQUE_ESCURO,
+  COR_PRETO,
+  COR_TEXTO_ESCURO,
+  TEMA_BORDAS_COR_CLARO,
+  TEMA_BORDAS_COR_ESCURO,
+  TEMA_FUNDO_CLARO,
+  TEMA_FUNDO_ESCURO,
+  TEMA_FUNDO_SECUNDARIO_ESCURO,
+  TEMA_TEXTO_CLARO,
+} from '@/constants/cores';
 import { useMap, useUI } from '@/hooks';
 import {
   BottomSheetBackdrop,
@@ -80,7 +92,10 @@ export function RotaButtomSheet() {
         backgroundColor: isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO,
         width: 40,
       }}
-      backgroundStyle={{ borderRadius: 24, backgroundColor: isDark ? '#1e293b' : 'white' }}
+      backgroundStyle={{
+        borderRadius: 24,
+        backgroundColor: isDark ? TEMA_FUNDO_ESCURO : TEMA_FUNDO_CLARO,
+      }}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
     >
@@ -93,7 +108,7 @@ export function RotaButtomSheet() {
         <TextInput
           style={[styles.input, isDark && styles.inputDark]}
           placeholder="Buscar destino..."
-          placeholderTextColor={isDark ? '#94a3b8' : 'gray'}
+          placeholderTextColor={isDark ? TEMA_BORDAS_COR_ESCURO : TEMA_BORDAS_COR_CLARO}
           value={busca}
           onChangeText={setBusca}
           autoCorrect={false}
@@ -102,7 +117,7 @@ export function RotaButtomSheet() {
         {carregando && (
           <ActivityIndicator
             size="small"
-            color={isDark ? '#38bdf8' : '#0d9488'}
+            color={isDark ? COR_DESTAQUE_ESCURO : COR_DESTAQUE}
             style={{ marginVertical: 10 }}
           />
         )}
@@ -137,58 +152,58 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   contentContainerDark: {
-    backgroundColor: '#1e293b',
+    backgroundColor: TEMA_FUNDO_ESCURO,
   },
   input: {
     height: 56,
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    backgroundColor: '#f1f5f9',
-    color: '#333',
+    backgroundColor: TEMA_TEXTO_CLARO,
+    color: COR_TEXTO_ESCURO,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     marginBottom: 12,
   },
   inputDark: {
     backgroundColor: '#0f172a',
-    color: '#f8fafc',
-    borderColor: '#334155',
+    color: TEMA_TEXTO_CLARO,
+    borderColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
   },
   title: {
     fontSize: 25,
     fontWeight: 'bold',
-    color: 'black',
+    color: COR_PRETO,
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: 'gray',
+    color: COR_CINZA,
     marginBottom: 20,
   },
   textDark: {
-    color: '#f1f5f9',
+    color: TEMA_TEXTO_CLARO,
   },
   textSubDark: {
-    color: '#94a3b8',
+    color: TEMA_BORDAS_COR_ESCURO,
   },
   suggestionRow: {
     paddingVertical: 14,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomColor: TEMA_TEXTO_CLARO,
   },
   suggestionRowDark: {
-    borderBottomColor: '#334155',
+    borderBottomColor: TEMA_FUNDO_SECUNDARIO_ESCURO,
   },
   suggestionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
+    color: TEMA_FUNDO_ESCURO,
   },
   suggestionSub: {
     fontSize: 13,
-    color: '#64748b',
+    color: TEMA_BORDAS_COR_CLARO,
     marginTop: 2,
   },
 });
