@@ -78,3 +78,73 @@ export const calcularRotaApi = async (
     return [];
   }
 };
+
+//API para sugestao de destino
+
+export interface SugestaoLugar {
+  placeId: string;
+  titulo: string;
+  subtitulo: string;
+}
+
+export const buscarSugestaoLugar = async (texto: string): Promise<SugestaoLugar[]> => {
+  if (texto.trim().length < 3) return [];
+
+  try {
+    const response = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+      },
+      body: JSON.stringify({
+        input: texto,
+        languageCode: 'pt-BR',
+        includedRegionCode: ['br'],
+      }),
+    });
+    const data = await response.json();
+
+    if (data.suggestions) {
+      return data.suggestions
+        .filter((item: any) => item.placePrediction)
+        .map((item: any) => ({
+          placeId: item.placePrediction.placeId,
+          titulo:
+            item.placePrediction.structuredFormat?.mainText?.text ||
+            item.placePrediction.text?.text ||
+            '',
+          subtitulo: item.placePrediction.structuredFormat?.secondaryText?.text || '',
+        }));
+    }
+
+    return [];
+  } catch (e) {
+    console.error('Erro ao buscar sugestoes Places API:', e);
+    return [];
+  }
+};
+
+export const buscarCoordenadasLugar = async (placeId: string): Promise<Coordenada | null> => {
+  try {
+    const response = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+      method: 'GET',
+      headers: {
+        'X-Goog-Api-Key': process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        'X-Goog-FieldMask': 'location',
+      },
+    });
+    const data = await response.json();
+
+    if (data.location) {
+      return {
+        latitude: data.location.latitude,
+        longitude: data.location.longitude,
+      };
+    }
+    return null;
+  } catch (e) {
+    console.error('Erro ao buscar coordenadas do lugar: ', e);
+    return null;
+  }
+};
